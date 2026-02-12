@@ -1,0 +1,6 @@
+ACME SUPPLIER INVOICE
+Invoice Number: INV-1001
+Invoice Date: 2025-01-20
+Due Date: 2025-02-20
+Total Amount: 1200.00
+GST Amount: 109.09
