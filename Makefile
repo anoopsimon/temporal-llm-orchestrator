@@ -95,4 +95,4 @@ eval-braintrust:
 
 .PHONY: eval-braintrust-docker
 eval-braintrust-docker:
-	docker compose run --rm --profile eval braintrust-eval
+	COMPOSE_PROFILES=eval docker compose run --rm braintrust-eval
