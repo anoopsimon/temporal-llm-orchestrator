@@ -1,9 +1,6 @@
 package temporal
 
 import (
-	"time"
-
-	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 
 	"temporal-llm-orchestrator/internal/domain"
@@ -23,27 +20,19 @@ type WorkflowResult struct {
 }
 
 func DocumentIntakeWorkflow(ctx workflow.Context, input WorkflowInput) (WorkflowResult, error) {
-	defaultAO := workflow.ActivityOptions{
-		StartToCloseTimeout: 2 * time.Minute,
-		RetryPolicy: &temporal.RetryPolicy{
-			InitialInterval:    time.Second,
-			BackoffCoefficient: 2,
-			MaximumInterval:    10 * time.Second,
-			MaximumAttempts:    3,
-		},
-	}
-	noRetryAO := workflow.ActivityOptions{
-		StartToCloseTimeout: 2 * time.Minute,
-		RetryPolicy: &temporal.RetryPolicy{
-			MaximumAttempts: 1,
-		},
-	}
-
-	ctxDefault := workflow.WithActivityOptions(ctx, defaultAO)
-	ctxNoRetry := workflow.WithActivityOptions(ctx, noRetryAO)
+	ctxStoreDocument := mustActivityContext(ctx, ActivityPolicyStoreDocument)
+	ctxDetectDocType := mustActivityContext(ctx, ActivityPolicyDetectDocType)
+	ctxExtractFields := mustActivityContext(ctx, ActivityPolicyExtractFieldsWithOpenAI)
+	ctxValidateFields := mustActivityContext(ctx, ActivityPolicyValidateFields)
+	ctxCorrectFields := mustActivityContext(ctx, ActivityPolicyCorrectFieldsWithOpenAI)
+	ctxQueueReview := mustActivityContext(ctx, ActivityPolicyQueueReview)
+	ctxResolveReview := mustActivityContext(ctx, ActivityPolicyResolveReview)
+	ctxApplyReviewerCorrection := mustActivityContext(ctx, ActivityPolicyApplyReviewerCorrection)
+	ctxPersistResult := mustActivityContext(ctx, ActivityPolicyPersistResult)
+	ctxRejectDocument := mustActivityContext(ctx, ActivityPolicyRejectDocument)
 
 	var stored StoreDocumentOutput
-	if err := workflow.ExecuteActivity(ctxDefault, (*Activities).StoreDocumentActivity, StoreDocumentInput{
+	if err := workflow.ExecuteActivity(ctxStoreDocument, (*Activities).StoreDocumentActivity, StoreDocumentInput{
 		DocumentID: input.DocumentID,
 		Filename:   input.Filename,
 		Content:    input.Content,
@@ -52,7 +41,7 @@ func DocumentIntakeWorkflow(ctx workflow.Context, input WorkflowInput) (Workflow
 	}
 
 	var detected DetectDocTypeOutput
-	if err := workflow.ExecuteActivity(ctxDefault, (*Activities).DetectDocTypeActivity, DetectDocTypeInput{
+	if err := workflow.ExecuteActivity(ctxDetectDocType, (*Activities).DetectDocTypeActivity, DetectDocTypeInput{
 		DocumentID:   input.DocumentID,
 		Filename:     input.Filename,
 		DocumentText: stored.DocumentText,
@@ -61,7 +50,7 @@ func DocumentIntakeWorkflow(ctx workflow.Context, input WorkflowInput) (Workflow
 	}
 
 	var extracted ExtractFieldsOutput
-	if err := workflow.ExecuteActivity(ctxNoRetry, (*Activities).ExtractFieldsWithOpenAIActivity, ExtractFieldsInput{
+	if err := workflow.ExecuteActivity(ctxExtractFields, (*Activities).ExtractFieldsWithOpenAIActivity, ExtractFieldsInput{
 		DocumentID:   input.DocumentID,
 		DocType:      detected.DocType,
 		DocumentText: stored.DocumentText,
@@ -70,7 +59,7 @@ func DocumentIntakeWorkflow(ctx workflow.Context, input WorkflowInput) (Workflow
 	}
 
 	var validation ValidateFieldsOutput
-	if err := workflow.ExecuteActivity(ctxDefault, (*Activities).ValidateFieldsActivity, ValidateFieldsInput{
+	if err := workflow.ExecuteActivity(ctxValidateFields, (*Activities).ValidateFieldsActivity, ValidateFieldsInput{
 		DocType:        detected.DocType,
 		ExtractionJSON: extracted.ExtractionJSON,
 	}).Get(ctx, &validation); err != nil {
@@ -79,7 +68,7 @@ func DocumentIntakeWorkflow(ctx workflow.Context, input WorkflowInput) (Workflow
 
 	if len(validation.FailedRules) > 0 || validation.Confidence < 0.75 {
 		var corrected CorrectFieldsOutput
-		err := workflow.ExecuteActivity(ctxNoRetry, (*Activities).CorrectFieldsWithOpenAIActivity, CorrectFieldsInput{
+		err := workflow.ExecuteActivity(ctxCorrectFields, (*Activities).CorrectFieldsWithOpenAIActivity, CorrectFieldsInput{
 			DocumentID:   input.DocumentID,
 			DocType:      detected.DocType,
 			DocumentText: stored.DocumentText,
@@ -89,7 +78,7 @@ func DocumentIntakeWorkflow(ctx workflow.Context, input WorkflowInput) (Workflow
 		if err == nil {
 			extracted.ExtractionJSON = corrected.CorrectedJSON
 			extracted.Confidence = corrected.Confidence
-			if err := workflow.ExecuteActivity(ctxDefault, (*Activities).ValidateFieldsActivity, ValidateFieldsInput{
+			if err := workflow.ExecuteActivity(ctxValidateFields, (*Activities).ValidateFieldsActivity, ValidateFieldsInput{
 				DocType:        detected.DocType,
 				ExtractionJSON: extracted.ExtractionJSON,
 			}).Get(ctx, &validation); err != nil {
@@ -99,7 +88,7 @@ func DocumentIntakeWorkflow(ctx workflow.Context, input WorkflowInput) (Workflow
 	}
 
 	if len(validation.FailedRules) > 0 || validation.Confidence < 0.75 {
-		if err := workflow.ExecuteActivity(ctxDefault, (*Activities).QueueReviewActivity, QueueReviewInput{
+		if err := workflow.ExecuteActivity(ctxQueueReview, (*Activities).QueueReviewActivity, QueueReviewInput{
 			DocumentID:  input.DocumentID,
 			FailedRules: validation.FailedRules,
 			CurrentJSON: extracted.ExtractionJSON,
@@ -114,13 +103,13 @@ func DocumentIntakeWorkflow(ctx workflow.Context, input WorkflowInput) (Workflow
 
 			switch decision.Decision {
 			case domain.ReviewDecisionApprove:
-				_ = workflow.ExecuteActivity(ctxDefault, (*Activities).ResolveReviewActivity, ResolveReviewInput{
+				_ = workflow.ExecuteActivity(ctxResolveReview, (*Activities).ResolveReviewActivity, ResolveReviewInput{
 					DocumentID: input.DocumentID,
 					Decision:   "APPROVED",
 				}).Get(ctx, nil)
 				goto persist
 			case domain.ReviewDecisionReject:
-				if err := workflow.ExecuteActivity(ctxDefault, (*Activities).RejectDocumentActivity, RejectDocumentInput{
+				if err := workflow.ExecuteActivity(ctxRejectDocument, (*Activities).RejectDocumentActivity, RejectDocumentInput{
 					DocumentID: input.DocumentID,
 					Reason:     decision.Reason,
 				}).Get(ctx, nil); err != nil {
@@ -129,7 +118,7 @@ func DocumentIntakeWorkflow(ctx workflow.Context, input WorkflowInput) (Workflow
 				return WorkflowResult{DocumentID: input.DocumentID, Status: domain.StatusRejected}, nil
 			case domain.ReviewDecisionCorrect:
 				var correctedByReviewer ApplyReviewerCorrectionOutput
-				if err := workflow.ExecuteActivity(ctxDefault, (*Activities).ApplyReviewerCorrectionActivity, ApplyReviewerCorrectionInput{
+				if err := workflow.ExecuteActivity(ctxApplyReviewerCorrection, (*Activities).ApplyReviewerCorrectionActivity, ApplyReviewerCorrectionInput{
 					DocumentID:  input.DocumentID,
 					DocType:     detected.DocType,
 					Corrections: decision.Corrections,
@@ -145,14 +134,14 @@ func DocumentIntakeWorkflow(ctx workflow.Context, input WorkflowInput) (Workflow
 				validation.FailedRules = correctedByReviewer.FailedRules
 
 				if len(validation.FailedRules) == 0 && validation.Confidence >= 0.75 {
-					_ = workflow.ExecuteActivity(ctxDefault, (*Activities).ResolveReviewActivity, ResolveReviewInput{
+					_ = workflow.ExecuteActivity(ctxResolveReview, (*Activities).ResolveReviewActivity, ResolveReviewInput{
 						DocumentID: input.DocumentID,
 						Decision:   "CORRECTED",
 					}).Get(ctx, nil)
 					goto persist
 				}
 
-				if err := workflow.ExecuteActivity(ctxDefault, (*Activities).QueueReviewActivity, QueueReviewInput{
+				if err := workflow.ExecuteActivity(ctxQueueReview, (*Activities).QueueReviewActivity, QueueReviewInput{
 					DocumentID:  input.DocumentID,
 					FailedRules: validation.FailedRules,
 					CurrentJSON: extracted.ExtractionJSON,
@@ -166,7 +155,7 @@ func DocumentIntakeWorkflow(ctx workflow.Context, input WorkflowInput) (Workflow
 	}
 
 persist:
-	if err := workflow.ExecuteActivity(ctxDefault, (*Activities).PersistResultActivity, PersistResultInput{
+	if err := workflow.ExecuteActivity(ctxPersistResult, (*Activities).PersistResultActivity, PersistResultInput{
 		DocumentID: input.DocumentID,
 		FinalJSON:  extracted.ExtractionJSON,
 		Confidence: extracted.Confidence,
