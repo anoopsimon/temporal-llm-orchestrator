@@ -190,12 +190,11 @@ It scores:
 Setup and run:
 
 ```bash
-make eval-braintrust-install
 # set BRAINTRUST_API_KEY in .env
 make eval-braintrust
 ```
 
-Docker-only run (no host Python):
+Docker run (recommended):
 
 ```bash
 # set BRAINTRUST_API_KEY in .env
@@ -203,12 +202,16 @@ make start
 make eval-braintrust-docker
 ```
 
+`eval-braintrust` runs the Go evaluator in `evals/braintrust/` on your host.
+`eval-braintrust-docker` runs the same Go evaluator inside Docker.
+
 Environment controls:
 
 - `EVAL_API_URL` default `http://localhost:8080`
 - `EVAL_CASES_PATH` default `evals/braintrust/cases.json`
 - `EVAL_AUTO_APPROVE_REVIEW` default `false`
 - `EVAL_POLL_TIMEOUT_SEC` default `180`
+- `BRAINTRUST_PROJECT` default `temporal-llm-orchestrator`
 
 ## Documentation Site (GitHub Pages)
 

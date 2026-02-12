@@ -132,7 +132,7 @@ services:
       - ./:/app
 
   braintrust-eval:
-    image: python:3.12-slim
+    image: golang:1.25
     container_name: braintrust-eval
     working_dir: /app
     depends_on:
@@ -146,11 +146,10 @@ services:
       EVAL_AUTO_APPROVE_REVIEW: ${EVAL_AUTO_APPROVE_REVIEW:-false}
       EVAL_POLL_TIMEOUT_SEC: ${EVAL_POLL_TIMEOUT_SEC:-180}
       BRAINTRUST_API_KEY: ${BRAINTRUST_API_KEY:-}
-      PIP_ROOT_USER_ACTION: ignore
-      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      BRAINTRUST_PROJECT: ${BRAINTRUST_PROJECT:-temporal-llm-orchestrator}
     volumes:
       - ./:/app
-    command: /bin/sh -lc "pip install --no-cache-dir -r evals/braintrust/requirements.txt && braintrust eval evals/braintrust"
+    command: /bin/sh -lc "cd evals/braintrust && go mod download && go run ."
     profiles:
       - eval
 

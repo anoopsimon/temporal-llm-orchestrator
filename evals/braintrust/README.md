@@ -26,12 +26,11 @@ make start
 make eval-braintrust-docker
 ```
 
-This runs the eval in a dedicated `python:3.12-slim` container and calls your API at `http://api:8080` on the Docker network.
+This runs the eval in a dedicated `golang:1.25` container and calls your API at `http://api:8080` on the Docker network.
 
-## Install and run on host
+## Run on host
 
 ```bash
-make eval-braintrust-install
 # set BRAINTRUST_API_KEY in .env
 make eval-braintrust
 ```
@@ -42,8 +41,10 @@ Optional runtime controls:
 - `EVAL_CASES_PATH` default `evals/braintrust/cases.json`
 - `EVAL_AUTO_APPROVE_REVIEW` default `false`
 - `EVAL_POLL_TIMEOUT_SEC` default `180`
+- `BRAINTRUST_PROJECT` default `temporal-llm-orchestrator`
 
 ## Notes
 
+- Evaluator entrypoint is `evals/braintrust/main.go` and uses `github.com/braintrustdata/braintrust-sdk-go/eval`.
 - If you set `EVAL_AUTO_APPROVE_REVIEW=true`, cases that route to review will be auto-approved to reach terminal output.
 - Keep `EVAL_AUTO_APPROVE_REVIEW=false` for strict quality gates in CI.

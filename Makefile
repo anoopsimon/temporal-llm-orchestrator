@@ -81,17 +81,11 @@ docs-dev:
 docs-build:
 	cd docs && BASE_PATH= npm run build
 
-.PHONY: eval-braintrust-install
-eval-braintrust-install:
-	python3 -m venv .venv-braintrust
-	. .venv-braintrust/bin/activate && pip install --upgrade pip && pip install -r evals/braintrust/requirements.txt
-
 .PHONY: eval-braintrust
 eval-braintrust:
-	@test -x ".venv-braintrust/bin/braintrust" || (echo "Run 'make eval-braintrust-install' first"; exit 1)
 	@set -a; [ -f ./.env ] && . ./.env; set +a; \
 	test -n "$$BRAINTRUST_API_KEY" || (echo "BRAINTRUST_API_KEY is required in .env"; exit 1); \
-	. .venv-braintrust/bin/activate && braintrust eval evals/braintrust
+	cd evals/braintrust && go run .
 
 .PHONY: eval-braintrust-docker
 eval-braintrust-docker:
