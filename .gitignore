@@ -1,0 +1,21 @@
+# Local env
+.env
+
+# Go build artifacts
+bin/
+*.test
+*.out
+
+# Editor/OS files
+.DS_Store
+.vscode/
+.idea/
+
+# Docs app artifacts
+docs/node_modules/
+docs/.next/
+docs/out/
+
+# Logs and temp
+*.log
+.tmp/
