@@ -1,0 +1,88 @@
+---
+title: Reviewer Playbook
+description: How to process NEEDS_REVIEW documents safely and consistently
+---
+
+# Reviewer Playbook
+
+This playbook covers the human-in-the-loop flow when a document reaches `NEEDS_REVIEW`.
+
+## When review is required
+
+A document enters `NEEDS_REVIEW` when:
+
+- validation still fails after correction attempt
+- confidence remains below `0.75` after correction attempt
+
+Reference flow: `internal/temporal/workflows.go`
+
+## 1. List pending review items
+
+```bash
+curl -s http://localhost:8080/v1/reviews/pending
+```
+
+## 2. Inspect current extracted result
+
+```bash
+curl -s http://localhost:8080/v1/documents/<documentId>/status
+curl -s http://localhost:8080/v1/documents/<documentId>/result
+```
+
+## 3. Send reviewer decision
+
+### Approve
+
+Use when extracted data is acceptable as-is.
+
+```bash
+curl -s -X POST http://localhost:8080/v1/documents/<documentId>/review \
+  -H "Content-Type: application/json" \
+  -d '{"decision":"approve","reviewer":"analyst@company.com","reason":"validated manually"}'
+```
+
+### Correct
+
+Use when fields need edits before completion.
+
+```bash
+curl -s -X POST http://localhost:8080/v1/documents/<documentId>/review \
+  -H "Content-Type: application/json" \
+  -d '{
+    "decision":"correct",
+    "reviewer":"analyst@company.com",
+    "reason":"fixed invoice date and total",
+    "corrections":{"invoice_date":"2025-01-20","total_amount":1200.00,"confidence":0.92}
+  }'
+```
+
+### Reject
+
+Use when the document should not be accepted.
+
+```bash
+curl -s -X POST http://localhost:8080/v1/documents/<documentId>/review \
+  -H "Content-Type: application/json" \
+  -d '{"decision":"reject","reviewer":"analyst@company.com","reason":"unsupported document format"}'
+```
+
+## 4. Verify terminal state
+
+```bash
+curl -s http://localhost:8080/v1/documents/<documentId>/status
+curl -s http://localhost:8080/v1/documents/<documentId>/result
+```
+
+Expected terminal statuses:
+
+- `COMPLETED` after approved/corrected valid payload
+- `REJECTED` after explicit reject
+
+## Decision guidelines
+
+- prefer `correct` when fields are fixable and confidence can be justified
+- use `reject` for unsupported, corrupted, or policy-blocked documents
+- include `reviewer` and `reason` for audit quality
+
+> **Important**
+> Review signals are asynchronous. If status still shows `NEEDS_REVIEW` briefly, poll again.
