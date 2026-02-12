@@ -1,0 +1,43 @@
+[
+  {
+    "input": {
+      "name": "payslip-happy-path",
+      "doc_type": "payslip",
+      "file_path": "testdata/payslip.txt"
+    },
+    "expected": {
+      "status": "COMPLETED",
+      "doc_type": "payslip",
+      "min_confidence": 0.75,
+      "result": {
+        "employee_name": "Jane Doe",
+        "employer_name": "ACME",
+        "pay_period_start": "2025-01-01",
+        "pay_period_end": "2025-01-15",
+        "gross_pay": 2000.0,
+        "net_pay": 1500.0,
+        "tax_withheld": 500.0
+      }
+    }
+  },
+  {
+    "input": {
+      "name": "invoice-happy-path",
+      "doc_type": "invoice",
+      "file_path": "testdata/invoice.txt"
+    },
+    "expected": {
+      "status": "COMPLETED",
+      "doc_type": "invoice",
+      "min_confidence": 0.75,
+      "result": {
+        "supplier_name": "ACME",
+        "invoice_number": "INV-1001",
+        "invoice_date": "2025-01-20",
+        "due_date": "2025-02-20",
+        "total_amount": 1200.0,
+        "gst_amount": 109.09
+      }
+    }
+  }
+]

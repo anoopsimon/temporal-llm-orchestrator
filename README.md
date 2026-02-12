@@ -173,6 +173,35 @@ make run-workflow
 ./scripts/run-workflow.sh --file testdata/invoice.txt
 ```
 
+## LLM Evals with Braintrust
+
+This repository includes an eval harness in `evals/braintrust/` for professional quality checks on extraction behavior.
+
+It scores:
+
+- completion status
+- document type match
+- schema conformance
+- field-level accuracy
+- validation rule compliance
+- confidence threshold
+- review avoidance
+
+Setup and run:
+
+```bash
+make eval-braintrust-install
+export BRAINTRUST_API_KEY=...
+make eval-braintrust
+```
+
+Environment controls:
+
+- `EVAL_API_URL` default `http://localhost:8080`
+- `EVAL_CASES_PATH` default `evals/braintrust/cases.json`
+- `EVAL_AUTO_APPROVE_REVIEW` default `false`
+- `EVAL_POLL_TIMEOUT_SEC` default `180`
+
 ## Documentation Site (GitHub Pages)
 
 This repository includes a full Nextra documentation site in `docs/`.

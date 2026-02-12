@@ -1,0 +1,2 @@
+braintrust>=0.0.190
+requests>=2.31.0

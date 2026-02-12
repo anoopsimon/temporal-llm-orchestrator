@@ -19,3 +19,4 @@ docs/out/
 # Logs and temp
 *.log
 .tmp/
+.venv-braintrust/
