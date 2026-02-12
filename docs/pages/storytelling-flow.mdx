@@ -203,6 +203,69 @@ result, err := evaluator.Run(ctx, eval.Opts[evalInput, evalOutput]{
 })
 ```
 
+## Where To See What
+
+Use this as your "what happened and where do I check" map during runs.
+
+Local URLs:
+
+- API: `http://localhost:8080`
+- Temporal UI: `http://localhost:8233`
+- MinIO API: `http://localhost:9000`
+- MinIO Console: `http://localhost:9001` (login `minioadmin` / `minioadmin`)
+
+Phase-by-phase checks:
+
+1. Upload started
+- Call `POST /v1/documents` with a file.
+- Response gives `document_id` and `workflow_id`.
+- This means intake was accepted and workflow started.
+
+2. Workflow progress
+- Poll `GET /v1/documents/{documentId}/status`.
+- Status moves through states like `STORED`, `CLASSIFIED`, `EXTRACTED`, `NEEDS_REVIEW`, `COMPLETED`, `REJECTED`.
+- In Temporal UI, open workflow `doc-intake-{documentId}` to see activity execution order and retries.
+
+3. What LLM produced in A, B, C
+- Query `extraction_attempts` table to see raw outputs saved per phase.
+- Example:
+
+```sql
+SELECT phase, output, created_at
+FROM extraction_attempts
+WHERE document_id = 'YOUR_DOCUMENT_ID'
+ORDER BY created_at;
+```
+
+4. Why status changed
+- Query `audit_log` table for state transitions and detail payload.
+- Example:
+
+```sql
+SELECT state, detail, created_at
+FROM audit_log
+WHERE document_id = 'YOUR_DOCUMENT_ID'
+ORDER BY created_at;
+```
+
+5. Human review queue
+- Call `GET /v1/reviews/pending` for pending items.
+- Or query DB table `review_queue`.
+- Send review decision with `POST /v1/documents/{documentId}/review` using `approve`, `reject`, or `correct`.
+
+6. Final output for consumers
+- Call `GET /v1/documents/{documentId}/result`.
+- Returns final `status`, `doc_type`, `confidence`, and extracted `result` JSON.
+
+7. Stored source file
+- In MinIO Console, open bucket `documents`.
+- You can inspect uploaded object keys and verify the source artifact exists.
+
+8. Evaluation report
+- Run `make eval-braintrust` or `make eval-braintrust-docker`.
+- The evaluator prints `Braintrust report: <url>` when the run completes.
+- Open that URL to see scorer results like `field_accuracy`, `schema_conformance`, `validation_rules`, and `confidence_threshold`.
+
 ## Final Mental Model
 
 - LLM suggests data.
