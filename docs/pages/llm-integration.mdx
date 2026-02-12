@@ -1,0 +1,66 @@
+---
+title: LLM Integration
+description: Prompt sets, wrapper design, strict output handling, and retries
+---
+
+# LLM Integration
+
+## Where LLM is used
+
+The only model-facing code paths are in activities, never workflow logic.
+
+- Wrapper: `internal/openai/client.go`
+- Prompts: `internal/openai/prompts.go`
+- Parse + normalize: `internal/openai/parse.go`
+- Orchestration calls: `internal/temporal/activities.go`
+
+## Prompt Sets
+
+Three prompt sets are embedded as constants and used in strict order:
+
+1. `BASE_SYSTEM` + `BASE_USER_TEMPLATE`
+2. `REPAIR_SYSTEM` + `REPAIR_USER_TEMPLATE`
+3. `CORRECT_SYSTEM` + `CORRECT_USER_TEMPLATE`
+
+## Wrapper Contract
+
+`CompleteJSON(ctx, CompletionRequest)` supports:
+
+- model from env
+- system prompt
+- user prompt
+- timeout
+
+And requests JSON mode using `response_format` when calling OpenAI.
+
+## Retry behavior
+
+OpenAI calls in activities use bounded exponential backoff:
+
+```go
+// internal/temporal/activities.go
+for attempt := 1; attempt <= maxRetry; attempt++ {
+  out, err := a.LLM.CompleteJSON(...)
+  if err == nil {
+    return out, nil
+  }
+  delay := time.Duration(200*(1<<(attempt-1))) * time.Millisecond
+  time.Sleep(delay)
+}
+```
+
+## Strict JSON handling
+
+Model output is not trusted by default.
+
+`ParseAndNormalize` enforces:
+
+- valid JSON
+- no unknown keys
+- required keys present
+- strict decode into typed structs
+
+If parse fails after allowed ladder attempts, workflow fails extraction path and does not silently continue.
+
+> **Important**
+> Every model response used in decisions is persisted to `extraction_attempts` for audit.
