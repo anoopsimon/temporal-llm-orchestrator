@@ -1,0 +1,53 @@
+---
+title: Testing Strategy
+description: Unit and integration tests used to verify extraction quality and workflow safety
+---
+
+# Testing Strategy
+
+## Goal of testing in AI workflows
+
+The test strategy verifies both code behavior and safety behavior under uncertain model output.
+
+## Unit tests
+
+### Validation rules
+
+- File: `internal/domain/validation_test.go`
+- Covers payslip and invoice rule outcomes
+
+### Prompt rendering
+
+- File: `internal/openai/prompts_test.go`
+- Ensures template variables are injected correctly
+
+### Strict parsing
+
+- File: `internal/openai/parse_test.go`
+- Ensures unknown keys and malformed structures are rejected
+
+### Repair path behavior
+
+- File: `internal/temporal/activities_test.go`
+- `TestExtractFieldsWithRepairPath` simulates invalid Base output and valid Repair output
+
+## Integration test
+
+- File: `internal/temporal/workflows_integration_test.go`
+- Uses Temporal test environment
+- Stubs OpenAI client
+- Forces `NEEDS_REVIEW` via low confidence
+- Sends `approve` signal and verifies workflow completion
+
+## Why this matters for LLM accuracy
+
+Accuracy testing here is behavior-focused:
+
+- does invalid output trigger repair path?
+- does low confidence force human review?
+- can a reviewer safely unblock completion?
+
+This is more reliable than only checking exact text match from model output.
+
+> **Recommendation**
+> Add regression fixtures in `testdata/` from real document failures and replay them in CI.
