@@ -91,3 +91,8 @@ eval-braintrust:
 	@test -n "$$BRAINTRUST_API_KEY" || (echo "BRAINTRUST_API_KEY is required"; exit 1)
 	@test -x ".venv-braintrust/bin/braintrust" || (echo "Run 'make eval-braintrust-install' first"; exit 1)
 	. .venv-braintrust/bin/activate && braintrust eval evals/braintrust/document_extraction_eval.py
+
+.PHONY: eval-braintrust-docker
+eval-braintrust-docker:
+	@test -n "$$BRAINTRUST_API_KEY" || (echo "BRAINTRUST_API_KEY is required"; exit 1)
+	docker compose run --rm --profile eval braintrust-eval

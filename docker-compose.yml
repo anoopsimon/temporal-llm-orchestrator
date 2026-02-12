@@ -131,6 +131,28 @@ services:
     volumes:
       - ./:/app
 
+  braintrust-eval:
+    image: python:3.12-slim
+    container_name: braintrust-eval
+    working_dir: /app
+    depends_on:
+      - api
+      - worker
+    environment:
+      EVAL_API_URL: http://api:8080
+      EVAL_CASES_PATH: /app/evals/braintrust/cases.json
+      EVAL_AUTO_APPROVE_REVIEW: ${EVAL_AUTO_APPROVE_REVIEW:-false}
+      EVAL_POLL_TIMEOUT_SEC: ${EVAL_POLL_TIMEOUT_SEC:-180}
+      BRAINTRUST_API_KEY: ${BRAINTRUST_API_KEY:-}
+    volumes:
+      - ./:/app
+    entrypoint:
+      - /bin/sh
+      - -lc
+    command: pip install --no-cache-dir -r evals/braintrust/requirements.txt && braintrust eval evals/braintrust/document_extraction_eval.py
+    profiles:
+      - eval
+
 volumes:
   app_postgres_data:
   temporal_postgres_data:

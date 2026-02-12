@@ -195,6 +195,14 @@ export BRAINTRUST_API_KEY=...
 make eval-braintrust
 ```
 
+Docker-only run (no host Python):
+
+```bash
+export BRAINTRUST_API_KEY=...
+make start
+make eval-braintrust-docker
+```
+
 Environment controls:
 
 - `EVAL_API_URL` default `http://localhost:8080`
