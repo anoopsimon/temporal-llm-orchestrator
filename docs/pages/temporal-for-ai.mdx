@@ -1,0 +1,58 @@
+---
+title: Why Temporal
+description: Why Temporal is a strong fit for resilient AI workflows
+---
+
+# Why Temporal
+
+## Why use Temporal for AI workflows
+
+AI steps are probabilistic and external APIs fail in real systems. Temporal gives durable orchestration for this uncertainty.
+
+Key benefits:
+
+- durable state across process crashes
+- automatic retries with backoff
+- signal handling for human in the loop
+- full execution history for debugging
+- deterministic workflow logic
+
+## Resilience pattern implemented here
+
+This project uses a classic resilient AI workflow pattern:
+
+1. bounded retries
+2. fallback prompt path (repair)
+3. bounded correction pass
+4. human gate on uncertainty
+5. explicit final states
+
+That pattern is encoded directly in `internal/temporal/workflows.go`.
+
+## Why this is better than a single synchronous API route
+
+Without Temporal, a long extraction path would usually run inside one HTTP request and fail if any dependency is slow or transiently down.
+
+With Temporal:
+
+- HTTP returns quickly after starting workflow
+- workflow survives restarts
+- review can happen asynchronously hours later
+- no lost in-flight state
+
+## Determinism and side effects
+
+Temporal workflows must be deterministic. This repository keeps side effects in activities:
+
+- OpenAI calls
+- Postgres writes
+- MinIO writes
+
+This separation is a core correctness requirement.
+
+<details>
+<summary><strong>Short answer: why Temporal is a good choice here</strong></summary>
+
+Because AI extraction is not fully deterministic, production systems need durable orchestration, recovery, and explicit uncertainty handling. Temporal is purpose-built for exactly that.
+
+</details>
