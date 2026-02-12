@@ -224,6 +224,7 @@ Local docs commands:
 make docs-install
 make docs-dev
 make docs-build
+make docs-start
 ```
 
 GitHub Pages deployment:

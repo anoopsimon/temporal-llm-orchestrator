@@ -75,11 +75,15 @@ docs-install:
 
 .PHONY: docs-dev
 docs-dev:
-	cd docs && BASE_PATH= npm run dev
+	cd docs && BASE_PATH= NODE_ENV= npm run dev
 
 .PHONY: docs-build
 docs-build:
-	cd docs && BASE_PATH= npm run build
+	cd docs && BASE_PATH= NODE_ENV= npm run build
+
+.PHONY: docs-start
+docs-start:
+	cd docs && BASE_PATH= NODE_ENV= npm run start
 
 .PHONY: eval-braintrust
 eval-braintrust:

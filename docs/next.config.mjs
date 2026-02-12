@@ -10,6 +10,10 @@ const basePath = process.env.NODE_ENV === 'production' ? rawBasePath : ''
 
 export default withNextra({
   output: 'export',
+  env: {
+    // Disable Nextra client-side search to reduce bundle size for this small docs site.
+    NEXTRA_SEARCH: ''
+  },
   trailingSlash: true,
   images: {
     unoptimized: true
