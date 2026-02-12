@@ -1,0 +1,6 @@
+ACME PAYSLIP
+Employee: Jane Doe
+Pay Period: 2025-01-01 to 2025-01-15
+Gross Pay: 2000.00
+Tax Withheld: 500.00
+Net Pay: 1500.00
