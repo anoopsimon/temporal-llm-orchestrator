@@ -1,71 +1,22 @@
 ---
 title: Overview
-description: End to end guide to the AI Document Intake and Decision Workflow
+description: Story-first guide to how the AI document workflow actually works
 ---
 
 # AI Document Intake and Decision Workflow
 
-A production-focused workflow for extracting structured data from documents with OpenAI, validating business rules, handling low confidence safely, and guaranteeing progress with Temporal.
+A production workflow where AI extracts data, the system verifies it, and humans decide only when confidence is not good enough.
 
-> **What this system does**
-> - Accepts uploaded documents
-> - Detects document type
-> - Extracts fields with strict JSON contracts
-> - Repairs malformed JSON when needed
-> - Corrects rule failures once
-> - Sends uncertain cases to human review
-> - Persists full audit trail and final result
+This docs site is intentionally short and story-driven.
 
 ## Read This First
 
-If you are new to this system, use this reading order:
+Start here:
 
-1. [Quickstart](/quickstart)
-2. [Configuration](/configuration)
-3. [Architecture](/architecture)
-4. [Workflow Ladder](/workflow-ladder)
-5. [LLM Integration](/llm-integration)
-6. [Validation and Accuracy](/validation-and-accuracy)
-7. [Reviewer Playbook](/reviewer-playbook)
-8. [Testing Strategy](/testing-strategy)
-9. [Why Temporal](/temporal-for-ai)
-10. [Operations](/operations)
+1. [Storytelling Flow](/storytelling-flow)
 
-## Core Value Proposition
+## One Line Summary
 
-This project is not "just OCR + LLM". It is an **operational workflow system**:
+LLM does extraction work, but the system owns control, validation, retries, audit, and safe final decisions.
 
-- LLM output is treated as untrusted until parsed and validated
-- Every risky step has bounded retries
-- Human review is first class, not an afterthought
-- Workflow state is durable and replay-safe
-- Audit data is persisted for debugging and governance
-
-## Where The Core Logic Lives
-
-- Workflow orchestration: `internal/temporal/workflows.go`
-- Activities and decision steps: `internal/temporal/activities.go`
-- Prompt sets A/B/C: `internal/openai/prompts.go`
-- Strict parsing and schema guardrails: `internal/openai/parse.go`
-- Business rule validation: `internal/domain/validation.go`
-- API entrypoints: `internal/api/handlers.go`
-- Persistence: `internal/storage/postgres.go`
-
-## End To End Flow Snapshot
-
-```text
-Upload -> Store -> Classify -> Extract(A)
-  -> parse fail? -> Repair(B)
-  -> still fail? -> Base retry(A)
-  -> Validate
-  -> fail/low confidence? -> Correct(C)
-  -> still fail/low confidence? -> NEEDS_REVIEW signal loop
-  -> PersistResult -> COMPLETED
-```
-
-<details>
-<summary><strong>Design principle used throughout</strong></summary>
-
-The system chooses **safety over blind automation**. If data quality is uncertain, it routes to explicit review rather than silently committing bad output.
-
-</details>
+For implementation and code examples, use the storytelling page above.

@@ -1,0 +1,212 @@
+---
+title: Storytelling Flow
+description: Plain-English story of the full AI workflow with real code anchors
+---
+
+# Storytelling Flow
+
+## What This Is
+
+This project takes a raw document (for example, payslip or invoice), extracts structured fields, validates quality, and only auto-completes when confidence is good.
+
+If confidence is not good, it routes to human review.
+
+## How It Works (Big Picture)
+
+```text
+Upload document
+  -> Temporal workflow starts
+  -> Store + classify
+  -> Phase A (extract)
+  -> if broken JSON: Phase B (repair)
+  -> validate rules + confidence
+  -> if needed: Phase C (correct values)
+  -> if still risky: human review loop
+  -> final result persisted
+```
+
+Workflow orchestration entrypoint:
+
+- `internal/temporal/workflows.go`
+
+## Where LLM Comes Into Picture
+
+LLM is used only in activity code (not workflow code) for non-deterministic tasks:
+
+- extraction
+- JSON repair
+- rule-based correction
+
+Files:
+
+- `internal/temporal/activities.go`
+- `internal/openai/client.go`
+- `internal/openai/prompts.go`
+
+## What LLM Does In Each Phase
+
+1. Phase A: Extract
+- Prompts: `BASE_SYSTEM`, `BASE_USER_TEMPLATE`
+- Goal: pull structured fields from document text.
+
+2. Phase B: Repair
+- Prompts: `REPAIR_SYSTEM`, `REPAIR_USER_TEMPLATE`
+- Trigger: A output is invalid JSON or schema mismatch.
+- Goal: return valid schema-matching JSON only.
+
+3. Phase C: Correct
+- Prompts: `CORRECT_SYSTEM`, `CORRECT_USER_TEMPLATE`
+- Trigger: validation failed or confidence `< 0.75`.
+- Goal: correct only fields needed to satisfy rules.
+
+Prompt constants are in:
+
+- `internal/openai/prompts.go`
+
+## Where Activities Are
+
+All activities are in:
+
+- `internal/temporal/activities.go`
+
+Main activities in order:
+
+1. `StoreDocumentActivity`
+2. `DetectDocTypeActivity`
+3. `ExtractFieldsWithOpenAIActivity` (A/B/A retry ladder)
+4. `ValidateFieldsActivity`
+5. `CorrectFieldsWithOpenAIActivity` (C)
+6. `QueueReviewActivity` + signal loop
+7. `PersistResultActivity` or `RejectDocumentActivity`
+
+## Sample: Workflow Calling Activities
+
+```go
+// internal/temporal/workflows.go
+var extracted ExtractFieldsOutput
+err := workflow.ExecuteActivity(
+  ctxExtractFields,
+  (*Activities).ExtractFieldsWithOpenAIActivity,
+  ExtractFieldsInput{DocumentID: input.DocumentID, DocType: detected.DocType, DocumentText: stored.DocumentText},
+).Get(ctx, &extracted)
+```
+
+## Sample: Where LLM Is Called
+
+```go
+// internal/temporal/activities.go
+out, err := a.LLM.CompleteJSON(ctx, openai.CompletionRequest{
+  Model:        a.OpenAIModel,
+  SystemPrompt: systemPrompt,
+  UserPrompt:   userPrompt,
+  Timeout:      a.OpenAITimeout,
+})
+```
+
+## Sample: LLM Retry Policy In Activity
+
+```go
+// internal/temporal/activities.go
+for attempt := 1; attempt <= maxRetry; attempt++ {
+  out, err := a.LLM.CompleteJSON(...)
+  if err == nil {
+    return out, nil
+  }
+  delay := time.Duration(200*(1<<(attempt-1))) * time.Millisecond
+  time.Sleep(delay)
+}
+```
+
+Related policy setup:
+
+- activity-level OpenAI retry: `callOpenAIWithRetry` in `internal/temporal/activities.go`
+- per-activity Temporal retry options: `internal/temporal/activity_policies.go`
+
+## Sample: Prompt Usage
+
+```go
+// internal/openai/prompts.go
+const BASE_SYSTEM = `You are a document information extraction engine...`
+const REPAIR_SYSTEM = `You are a strict JSON repair engine...`
+const CORRECT_SYSTEM = `You are a document extraction correction engine...`
+```
+
+Prompt builders:
+
+- `BuildBaseUserPrompt(...)`
+- `BuildRepairUserPrompt(...)`
+- `BuildCorrectUserPrompt(...)`
+
+## Testing Confidence And Quality
+
+There are 3 layers of confidence/quality testing.
+
+1. Unit tests
+- validation rules (`internal/domain/validation_test.go`)
+- prompt rendering (`internal/openai/prompts_test.go`)
+- strict parsing (`internal/openai/parse_test.go`)
+
+2. Activity-level tests
+- invalid JSON repaired by Phase B:
+
+```go
+// internal/temporal/activities_test.go
+llm := &stubLLM{responses: []string{
+  `{"employee_name":"Jane"`,
+  `{"employee_name":"Jane","employer_name":"ACME",...,"confidence":0.9}`,
+}}
+out, err := acts.ExtractFieldsWithOpenAIActivity(...)
+require.NoError(t, err)
+require.Equal(t, 0.9, out.Confidence)
+```
+
+3. Workflow integration test
+- low-confidence path enters review and approve signal completes workflow:
+
+```go
+// internal/temporal/workflows_integration_test.go
+env.SignalWorkflow(ReviewDecisionSignalName, ReviewDecisionSignal{
+  Decision: domain.ReviewDecisionApprove,
+  Reviewer: "qa",
+})
+```
+
+## Why Braintrust Is Used
+
+Braintrust is used to evaluate production behavior continuously, not just unit logic.
+
+It gives you:
+
+- field-level accuracy scoring
+- schema conformance scoring
+- confidence-threshold scoring
+- review-avoidance metric
+- experiment history and comparison in UI
+
+Go eval harness location:
+
+- `evals/braintrust/main.go`
+
+## Sample: Braintrust Evaluator Setup
+
+```go
+// evals/braintrust/main.go
+result, err := evaluator.Run(ctx, eval.Opts[evalInput, evalOutput]{
+  Experiment: cfg.Experiment,
+  Dataset:    eval.NewDataset(cases),
+  Task:       eval.T(runner.runCase),
+  Scorers: []eval.Scorer[evalInput, evalOutput]{
+    eval.NewScorer("status", scoreStatus),
+    eval.NewScorer("field_accuracy", scoreFieldAccuracy),
+    eval.NewScorer("confidence_threshold", scoreConfidenceThreshold),
+  },
+})
+```
+
+## Final Mental Model
+
+- LLM suggests data.
+- System verifies data.
+- Human decides only when confidence is still not safe.
+
+That is the core design of this project.
