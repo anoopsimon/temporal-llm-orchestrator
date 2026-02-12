@@ -14,33 +14,29 @@ This repository implements an AI document intake pipeline with Go, Temporal, Ope
 ## Repository Layout
 
 ```
-/
-  cmd/api/main.go
-  cmd/worker/main.go
-  internal/api/routes.go
-  internal/api/handlers.go
-  internal/api/middleware.go
-  internal/temporal/workflows.go
-  internal/temporal/activities.go
-  internal/temporal/signals.go
-  internal/openai/client.go
-  internal/openai/prompts.go
-  internal/openai/parse.go
-  internal/storage/minio.go
-  internal/storage/postgres.go
-  internal/domain/models.go
-  internal/domain/validation.go
-  internal/domain/state.go
-  internal/config/config.go
-  db/migrations/001_init.sql
-  docker/temporal/dynamicconfig/
-  scripts/
-  testdata/
-  docker-compose.yml
-  Makefile
-  README.md
-  go.mod
-  go.sum
+.
+├── cmd/
+│   ├── api/main.go
+│   └── worker/main.go
+├── internal/
+│   ├── api/                         # routes, handlers, middleware
+│   ├── config/                      # env configuration
+│   ├── domain/                      # schema models, states, validation
+│   ├── openai/                      # prompts, client wrapper, strict parsing
+│   ├── storage/                     # Postgres and MinIO adapters
+│   └── temporal/                    # workflows, activities, signals
+├── db/migrations/001_init.sql
+├── docker/temporal/dynamicconfig/
+├── docs/                            # docs site
+├── evals/braintrust/                # Go Braintrust eval harness
+├── scripts/                         # helper scripts
+├── testdata/                        # sample documents
+├── .github/workflows/docs-gh-pages.yml
+├── docker-compose.yml
+├── Makefile
+├── README.md
+├── go.mod
+└── go.sum
 ```
 
 ## Prompt Sets and Execution Order
