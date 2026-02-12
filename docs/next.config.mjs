@@ -5,7 +5,8 @@ const withNextra = nextra({
   themeConfig: './theme.config.jsx'
 })
 
-const basePath = process.env.BASE_PATH || ''
+const rawBasePath = process.env.BASE_PATH || ''
+const basePath = process.env.NODE_ENV === 'production' ? rawBasePath : ''
 
 export default withNextra({
   output: 'export',
