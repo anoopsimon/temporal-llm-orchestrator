@@ -138,6 +138,8 @@ services:
     depends_on:
       - api
       - worker
+    env_file:
+      - .env
     environment:
       EVAL_API_URL: http://api:8080
       EVAL_CASES_PATH: /app/evals/braintrust/cases.json

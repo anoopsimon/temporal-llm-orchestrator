@@ -191,14 +191,14 @@ Setup and run:
 
 ```bash
 make eval-braintrust-install
-export BRAINTRUST_API_KEY=...
+# set BRAINTRUST_API_KEY in .env
 make eval-braintrust
 ```
 
 Docker-only run (no host Python):
 
 ```bash
-export BRAINTRUST_API_KEY=...
+# set BRAINTRUST_API_KEY in .env
 make start
 make eval-braintrust-docker
 ```

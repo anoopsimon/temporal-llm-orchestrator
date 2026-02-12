@@ -16,12 +16,12 @@ This folder contains production-grade LLM evals for document extraction quality.
 
 1. Running local stack (`make start`)
 2. Valid OpenAI key in `.env` used by API and worker
-3. Braintrust account key in shell: `BRAINTRUST_API_KEY`
+3. Braintrust account key in root `.env`: `BRAINTRUST_API_KEY`
 
 ## Run in Docker (recommended)
 
 ```bash
-export BRAINTRUST_API_KEY=...
+# set BRAINTRUST_API_KEY in .env
 make start
 make eval-braintrust-docker
 ```
@@ -32,7 +32,7 @@ This runs the eval in a dedicated `python:3.12-slim` container and calls your AP
 
 ```bash
 make eval-braintrust-install
-export BRAINTRUST_API_KEY=...
+# set BRAINTRUST_API_KEY in .env
 make eval-braintrust
 ```
 
