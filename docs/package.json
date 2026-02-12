@@ -1,0 +1,17 @@
+{
+  "name": "temporal-llm-orchestrator-docs",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "14.2.30",
+    "nextra": "3.0.15",
+    "nextra-theme-docs": "3.0.15",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  }
+}
