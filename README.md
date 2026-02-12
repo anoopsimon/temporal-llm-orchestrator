@@ -228,7 +228,7 @@ make docs-build
 GitHub Pages deployment:
 
 - Workflow file: `.github/workflows/docs-gh-pages.yml`
-- Trigger: push to `main` when `docs/**` changes
+- Trigger: push to `main` or `master`, and manual dispatch
 - Output: static export from `docs/out`
 
 ## Notes
