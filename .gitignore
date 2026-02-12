@@ -20,3 +20,7 @@ docs/out/
 *.log
 .tmp/
 .venv-braintrust/
+
+# Python cache
+__pycache__/
+*.pyc
