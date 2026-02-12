@@ -25,6 +25,28 @@ Upload document
   -> final result persisted
 ```
 
+Architecture diagram:
+
+```mermaid
+flowchart TD
+  U[Upload file via API] --> W[Temporal Document Workflow]
+  W --> S[StoreDocumentActivity]
+  S --> D[DetectDocTypeActivity]
+  D --> A[Phase A: Base Extraction]
+  A -->|JSON invalid| B[Phase B: JSON Repair]
+  A -->|JSON valid| V[Validate Rules and Confidence]
+  B --> V
+  V -->|failed rules or confidence < 0.75| C[Phase C: Rule Correction]
+  C --> RV[Re-Validate]
+  RV -->|still risky| RQ[Queue Human Review]
+  RQ --> SG[Wait for Review Signal]
+  SG -->|approve| P[PersistResultActivity]
+  SG -->|reject| X[RejectDocumentActivity]
+  SG -->|correct| RV
+  V -->|valid and confidence >= 0.75| P
+  P --> DB[(Postgres final result and audit)]
+```
+
 Workflow orchestration entrypoint:
 
 - `internal/temporal/workflows.go`

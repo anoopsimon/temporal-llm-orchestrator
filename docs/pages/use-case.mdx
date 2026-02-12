@@ -1,0 +1,55 @@
+---
+title: Intro Use Case
+description: Real business problem this workflow solves, in plain language
+---
+
+# Intro Use Case
+
+## The Problem
+
+A bank receives large volumes of customer and vendor documents every day:
+
+- payslips for loan assessment
+- invoices for operations and finance checks
+- mixed quality files from email, portals, and scanned uploads
+
+If people do all extraction manually, it is slow, expensive, and inconsistent.
+If AI does everything without guardrails, bad data can slip into decisions.
+
+## What This Project Solves
+
+This project gives you a controlled AI intake pipeline:
+
+1. AI extracts structured fields from raw document text.
+2. System validation checks business rules and confidence.
+3. Only uncertain cases go to human review.
+4. Every step is auditable for compliance and incident review.
+
+So the bank gets speed from AI, but keeps risk controls and traceability.
+
+## A Simple Story
+
+1. A customer uploads a payslip.
+2. Workflow stores file, detects document type, and runs LLM Phase A extraction.
+3. If JSON is broken, Phase B repairs the output.
+4. If values look wrong by rules, Phase C tries correction.
+5. If still low confidence, case goes to reviewer queue.
+6. Reviewer approves, rejects, or corrects.
+7. Final result is saved with full audit trail.
+
+## Where This Is Useful
+
+- loan origination and servicing
+- mortgage and personal lending ops
+- accounts payable document intake
+- shared services teams that process invoices and proof of income
+
+## What You Get
+
+- faster document processing
+- fewer manual touches on clean cases
+- safer handling of uncertain cases
+- clear evidence of what AI produced and what humans approved
+
+Next: [Storytelling Flow](/storytelling-flow)
+
