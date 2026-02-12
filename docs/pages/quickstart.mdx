@@ -1,0 +1,81 @@
+---
+title: Quickstart
+description: Run the stack and execute one complete workflow in minutes
+---
+
+# Quickstart
+
+## Prerequisites
+
+- Docker + Docker Compose
+- OpenAI API key
+- Optional: `curl` and `jq`
+
+## 1. Configure environment
+
+Create `.env` in repo root:
+
+```bash
+cp .env.example .env
+```
+
+Set:
+
+```bash
+OPENAI_API_KEY=sk-proj-...
+OPENAI_MODEL=gpt-4o-mini
+```
+
+> **Warning**
+> Use a valid `sk-...` or `sk-proj-...` key. Invalid prefix values will fail extraction.
+
+## 2. Start everything
+
+```bash
+make start
+make status
+```
+
+Services:
+
+- API: `http://localhost:8080`
+- Temporal gRPC: `localhost:7233`
+- Temporal UI: `http://localhost:8233`
+- MinIO API: `http://localhost:9000`
+- MinIO Console: `http://localhost:9001`
+- App Postgres: `localhost:5432`
+
+## 3. Run one full workflow
+
+```bash
+make run-workflow
+```
+
+This script:
+
+- waits for API readiness
+- uploads a sample document
+- polls workflow status
+- auto-approves review if status becomes `NEEDS_REVIEW`
+- prints final result
+
+## 4. Observe execution
+
+```bash
+make logs
+```
+
+Open Temporal UI at `http://localhost:8233` and inspect the workflow history.
+
+## 5. Run tests
+
+```bash
+make test
+```
+
+<details>
+<summary><strong>Troubleshooting first startup</strong></summary>
+
+The first startup may take longer because the API and worker containers run `go run` and compile dependencies. If upload fails with connection reset, wait for API readiness and rerun `make run-workflow`.
+
+</details>
