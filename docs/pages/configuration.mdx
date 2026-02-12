@@ -1,0 +1,65 @@
+---
+title: Configuration
+description: Environment variables, defaults, and production tuning knobs
+---
+
+# Configuration
+
+The application loads configuration from environment variables in `internal/config/config.go`.
+
+## Required variables
+
+- `POSTGRES_DSN`
+
+`POSTGRES_DSN` is required on startup. The service exits if it is empty.
+
+## Optional variables and defaults
+
+| Variable | Default | Notes |
+| --- | --- | --- |
+| `HTTP_PORT` | `8080` | API listener port |
+| `TEMPORAL_ADDRESS` | `localhost:7233` | Temporal frontend gRPC address |
+| `TEMPORAL_NAMESPACE` | `default` | Temporal namespace |
+| `TEMPORAL_TASK_QUEUE` | `document-intake-task-queue` | Worker task queue |
+| `OPENAI_MODEL` | `gpt-4o-mini` | Extraction/correction model |
+| `OPENAI_TIMEOUT_SEC` | `30` | Timeout per OpenAI call in activities |
+| `MINIO_ENDPOINT` | `localhost:9000` | MinIO endpoint |
+| `MINIO_BUCKET` | `documents` | Bucket for uploaded documents |
+| `MINIO_USE_SSL` | `false` | `true` for TLS endpoint |
+| `WORKFLOW_ID_PREFIX` | `doc-intake` | Prefix for workflow IDs |
+| `MAX_UPLOAD_BYTES` | `10485760` | Max upload size (10 MB) |
+
+## Optional secrets
+
+- `OPENAI_API_KEY`
+- `MINIO_ACCESS_KEY`
+- `MINIO_SECRET_KEY`
+
+> **Note**
+> The loader does not enforce these as required, but runtime operations that depend on them will fail if they are missing.
+
+## Local `.env` example
+
+```bash
+POSTGRES_DSN=postgres://postgres:postgres@localhost:5432/intake?sslmode=disable
+TEMPORAL_ADDRESS=localhost:7233
+TEMPORAL_NAMESPACE=default
+TEMPORAL_TASK_QUEUE=document-intake-task-queue
+
+MINIO_ENDPOINT=localhost:9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+MINIO_BUCKET=documents
+MINIO_USE_SSL=false
+
+OPENAI_API_KEY=sk-proj-...
+OPENAI_MODEL=gpt-4o-mini
+OPENAI_TIMEOUT_SEC=30
+```
+
+## Production recommendations
+
+- set `MAX_UPLOAD_BYTES` explicitly to your policy limit
+- use TLS endpoints and set `MINIO_USE_SSL=true`
+- configure unique `TEMPORAL_TASK_QUEUE` per environment
+- keep `WORKFLOW_ID_PREFIX` environment-specific to avoid collisions
