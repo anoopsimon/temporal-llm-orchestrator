@@ -27,9 +27,21 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure GitHub Pages
+        id: configure_pages
+        continue-on-error: true
         uses: actions/configure-pages@v5
         with:
           enablement: true
+          token: ${{ secrets.PAGES_ADMIN_TOKEN != '' && secrets.PAGES_ADMIN_TOKEN || github.token }}
+
+      - name: Check pages permissions
+        if: steps.configure_pages.outcome == 'failure'
+        run: |
+          echo "GitHub Pages could not be auto-enabled with this token."
+          echo "Either:"
+          echo "1) Enable Pages manually in Settings > Pages (Source: GitHub Actions), or"
+          echo "2) Add repository secret PAGES_ADMIN_TOKEN with admin permissions."
+          exit 1
 
       - name: Setup Node
         uses: actions/setup-node@v4
