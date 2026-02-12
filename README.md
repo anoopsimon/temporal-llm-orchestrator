@@ -41,11 +41,16 @@ This repository implements an AI document intake pipeline with Go, Temporal, Ope
 
 ## Prompt Sets and Execution Order
 
-The workflow uses these constants exactly in this order:
+The workflow runs in 3 phases, in this exact order:
 
-1. Prompt Set A: Base Extraction (`BASE_SYSTEM`, `BASE_USER_TEMPLATE`)
-2. Prompt Set B: JSON Repair (`REPAIR_SYSTEM`, `REPAIR_USER_TEMPLATE`) when A parse or schema fails
-3. Prompt Set C: Rule Correction (`CORRECT_SYSTEM`, `CORRECT_USER_TEMPLATE`) when validation fails or confidence is below `0.75`
+1. Phase A: Extract (`BASE_SYSTEM`, `BASE_USER_TEMPLATE`)
+   - AI reads the document and extracts structured fields.
+2. Phase B: Fix Format (`REPAIR_SYSTEM`, `REPAIR_USER_TEMPLATE`)
+   - If A output is invalid JSON or schema-mismatched, AI rewrites it into valid JSON.
+3. Phase C: Fix Values (`CORRECT_SYSTEM`, `CORRECT_USER_TEMPLATE`)
+   - If JSON is valid but business rules fail or confidence is below `0.75`, AI gets one correction pass.
+
+If output is still not reliable after A -> B -> C, the workflow routes to human review (`NEEDS_REVIEW`) instead of guessing.
 
 The orchestration ladder is implemented in `internal/temporal/workflows.go` and `internal/temporal/activities.go` with hard limits:
 
