@@ -28,6 +28,11 @@ func main() {
 	}
 	defer store.Close()
 
+	blob, err := storage.NewMinioStore(cfg.MinioEndpoint, cfg.MinioAccessKey, cfg.MinioSecretKey, cfg.MinioUseSSL, cfg.MinioBucket)
+	if err != nil {
+		log.Fatalf("connect minio: %v", err)
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := store.Ping(ctx); err != nil {
@@ -43,7 +48,7 @@ func main() {
 	}
 	defer temporalClient.Close()
 
-	h := api.NewHandler(cfg, store, temporalClient)
+	h := api.NewHandler(cfg, store, blob, temporalClient)
 	router := api.NewRouter(h)
 
 	srv := &http.Server{

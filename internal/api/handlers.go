@@ -22,7 +22,12 @@ import (
 type Handler struct {
 	cfg            config.Config
 	store          *storage.PostgresStore
+	blob           uploadBlobStore
 	temporalClient client.Client
+}
+
+type uploadBlobStore interface {
+	PutDocument(ctx context.Context, documentID, filename string, content []byte) (string, error)
 }
 
 type statusResponse struct {
@@ -47,8 +52,8 @@ type reviewRequest struct {
 	Reason      string          `json:"reason,omitempty"`
 }
 
-func NewHandler(cfg config.Config, store *storage.PostgresStore, temporalClient client.Client) *Handler {
-	return &Handler{cfg: cfg, store: store, temporalClient: temporalClient}
+func NewHandler(cfg config.Config, store *storage.PostgresStore, blob uploadBlobStore, temporalClient client.Client) *Handler {
+	return &Handler{cfg: cfg, store: store, blob: blob, temporalClient: temporalClient}
 }
 
 func (h *Handler) UploadDocument(w http.ResponseWriter, r *http.Request) {
@@ -83,21 +88,19 @@ func (h *Handler) UploadDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	workflowID := h.workflowID(documentID)
-	// Upload endpoint does not write directly to MinIO. It starts the Temporal workflow
-	// with raw file bytes, and the worker's StoreDocumentActivity persists those bytes to object storage.
-	_, err = h.temporalClient.ExecuteWorkflow(ctx, client.StartWorkflowOptions{
-		ID:        workflowID,
-		TaskQueue: h.cfg.TemporalTaskQueue,
-	}, appTemporal.DocumentIntakeWorkflowName, appTemporal.WorkflowInput{
-		DocumentID: documentID,
-		Filename:   header.Filename,
-		Content:    body,
-	})
+	objectKey, err := h.blob.PutDocument(ctx, documentID, header.Filename, body)
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "failed to start workflow"})
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "failed to upload file"})
 		return
 	}
+	if err := h.store.SetDocumentObjectKey(ctx, documentID, objectKey); err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "failed to record upload"})
+		return
+	}
+
+	workflowID := h.workflowID(documentID)
+	// Upload endpoint persists file bytes to object storage and returns quickly.
+	// Workflow start is decoupled: event-handler listens for object-created events and starts Temporal workflow.
 
 	writeJSON(w, http.StatusAccepted, map[string]any{
 		"document_id": documentID,

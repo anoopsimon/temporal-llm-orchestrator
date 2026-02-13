@@ -131,6 +131,30 @@ services:
     volumes:
       - ./:/app
 
+  event-handler:
+    image: golang:1.22
+    container_name: intake-event-handler
+    working_dir: /app
+    depends_on:
+      - temporal
+      - minio
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DSN: postgres://postgres:postgres@app-postgres:5432/intake?sslmode=disable
+      TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_NAMESPACE: default
+      TEMPORAL_TASK_QUEUE: document-intake-task-queue
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      MINIO_BUCKET: documents
+      MINIO_USE_SSL: "false"
+      WORKFLOW_ID_PREFIX: doc-intake
+    command: go run ./cmd/event-handler
+    volumes:
+      - ./:/app
+
   braintrust-eval:
     image: golang:1.25
     container_name: braintrust-eval

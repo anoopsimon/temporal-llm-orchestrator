@@ -11,6 +11,7 @@ const DocumentIntakeWorkflowName = "DocumentIntakeWorkflow"
 type WorkflowInput struct {
 	DocumentID string
 	Filename   string
+	ObjectKey  string
 	Content    []byte
 }
 
@@ -35,6 +36,7 @@ func DocumentIntakeWorkflow(ctx workflow.Context, input WorkflowInput) (Workflow
 	if err := workflow.ExecuteActivity(ctxStoreDocument, (*Activities).StoreDocumentActivity, StoreDocumentInput{
 		DocumentID: input.DocumentID,
 		Filename:   input.Filename,
+		ObjectKey:  input.ObjectKey,
 		Content:    input.Content,
 	}).Get(ctx, &stored); err != nil {
 		return WorkflowResult{}, err

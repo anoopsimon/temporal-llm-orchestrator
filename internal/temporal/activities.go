@@ -35,6 +35,7 @@ type ActivityStore interface {
 
 type BlobStore interface {
 	PutDocument(ctx context.Context, documentID, filename string, content []byte) (string, error)
+	GetDocument(ctx context.Context, objectKey string) ([]byte, error)
 }
 
 type Activities struct {
@@ -49,6 +50,7 @@ type Activities struct {
 type StoreDocumentInput struct {
 	DocumentID string
 	Filename   string
+	ObjectKey  string
 	Content    []byte
 }
 
@@ -144,14 +146,32 @@ func (a *Activities) StoreDocumentActivity(ctx context.Context, input StoreDocum
 		return StoreDocumentOutput{}, err
 	}
 
-	// This is where uploaded file bytes are persisted to object storage.
-	// No MinIO trigger/listener is used; the Temporal worker calls storage explicitly.
-	objectKey, err := a.Blob.PutDocument(ctx, input.DocumentID, input.Filename, input.Content)
-	if err != nil {
-		return StoreDocumentOutput{}, err
+	objectKey := strings.TrimSpace(input.ObjectKey)
+	var content []byte
+	if len(input.Content) > 0 {
+		// Backward-compatible path: workflow input includes raw bytes.
+		if objectKey == "" {
+			objectKey = input.DocumentID + "/" + input.Filename
+		}
+		// This path persists embedded bytes to object storage.
+		_, err := a.Blob.PutDocument(ctx, input.DocumentID, input.Filename, input.Content)
+		if err != nil {
+			return StoreDocumentOutput{}, err
+		}
+		content = input.Content
+	} else {
+		// Event-driven path: workflow input provides object reference, worker reads from storage.
+		if objectKey == "" {
+			objectKey = input.DocumentID + "/" + input.Filename
+		}
+		fetched, err := a.Blob.GetDocument(ctx, objectKey)
+		if err != nil {
+			return StoreDocumentOutput{}, err
+		}
+		content = fetched
 	}
 
-	docText := string(input.Content)
+	docText := string(content)
 	rec := domain.DocumentRecord{
 		ID:        input.DocumentID,
 		Filename:  input.Filename,

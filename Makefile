@@ -38,6 +38,20 @@ run-worker:
 	MINIO_USE_SSL="$${MINIO_USE_SSL:-false}" \
 	go run ./cmd/worker
 
+.PHONY: run-event-handler
+run-event-handler:
+	POSTGRES_DSN="$${POSTGRES_DSN:-postgres://postgres:postgres@localhost:5432/intake?sslmode=disable}" \
+	TEMPORAL_ADDRESS="$${TEMPORAL_ADDRESS:-localhost:7233}" \
+	TEMPORAL_NAMESPACE="$${TEMPORAL_NAMESPACE:-default}" \
+	TEMPORAL_TASK_QUEUE="$${TEMPORAL_TASK_QUEUE:-document-intake-task-queue}" \
+	MINIO_ENDPOINT="$${MINIO_ENDPOINT:-localhost:9000}" \
+	MINIO_ACCESS_KEY="$${MINIO_ACCESS_KEY:-minioadmin}" \
+	MINIO_SECRET_KEY="$${MINIO_SECRET_KEY:-minioadmin}" \
+	MINIO_BUCKET="$${MINIO_BUCKET:-documents}" \
+	MINIO_USE_SSL="$${MINIO_USE_SSL:-false}" \
+	WORKFLOW_ID_PREFIX="$${WORKFLOW_ID_PREFIX:-doc-intake}" \
+	go run ./cmd/event-handler
+
 .PHONY: compose-up
 compose-up:
 	docker compose up -d --build
@@ -63,7 +77,7 @@ status:
 
 .PHONY: logs
 logs:
-	docker compose logs -f api worker
+	docker compose logs -f api worker event-handler
 
 .PHONY: migrate
 migrate:

@@ -59,9 +59,9 @@ jobs:
         if: steps.key_check.outputs.has_key == 'true'
         run: go mod download
 
-      - name: Start compose infrastructure (including api/worker)
+      - name: Start compose infrastructure (including api/worker/event-handler)
         if: steps.key_check.outputs.has_key == 'true'
-        run: docker compose up -d app-postgres temporal-postgres temporal minio minio-setup api worker
+        run: docker compose up -d app-postgres temporal-postgres temporal minio minio-setup api worker event-handler
 
       - name: Run system blackbox test
         if: steps.key_check.outputs.has_key == 'true'

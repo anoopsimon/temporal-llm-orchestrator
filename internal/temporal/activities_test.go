@@ -3,6 +3,7 @@ package temporal
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -139,6 +140,10 @@ type fakeBlob struct{}
 
 func (f *fakeBlob) PutDocument(_ context.Context, documentID, filename string, _ []byte) (string, error) {
 	return documentID + "/" + filename, nil
+}
+
+func (f *fakeBlob) GetDocument(_ context.Context, objectKey string) ([]byte, error) {
+	return nil, fmt.Errorf("object %s not found in fake blob", objectKey)
 }
 
 type stubLLM struct {

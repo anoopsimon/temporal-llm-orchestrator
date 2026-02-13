@@ -40,6 +40,15 @@ func (s *PostgresStore) CreateReceivedDocument(ctx context.Context, documentID, 
 	return err
 }
 
+func (s *PostgresStore) SetDocumentObjectKey(ctx context.Context, documentID, objectKey string) error {
+	_, err := s.db.ExecContext(ctx, `
+		UPDATE documents
+		SET object_key = $2, updated_at = NOW()
+		WHERE id = $1
+	`, documentID, objectKey)
+	return err
+}
+
 func (s *PostgresStore) UpsertDocument(ctx context.Context, rec domain.DocumentRecord) error {
 	_, err := s.db.ExecContext(ctx, `
 		INSERT INTO documents (id, filename, object_key, raw_text, doc_type, status)

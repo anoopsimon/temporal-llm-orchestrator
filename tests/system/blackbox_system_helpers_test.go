@@ -96,6 +96,7 @@ var defaultSystemTestConfig = systemTestConfig{
 		"minio",
 		"api",
 		"worker",
+		"event-handler",
 	},
 	ExpectedActivityOrder: []string{
 		"StoreDocumentActivity",

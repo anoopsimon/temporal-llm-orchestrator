@@ -21,6 +21,7 @@ This repository implements an AI document intake pipeline with Go, Temporal, Ope
 .
 ├── cmd/
 │   ├── api/main.go
+│   ├── event-handler/main.go
 │   └── worker/main.go
 ├── internal/
 │   ├── api/                         # routes, handlers, middleware
@@ -109,6 +110,7 @@ Services:
 - MinIO API: `http://localhost:9000`
 - MinIO Console: `http://localhost:9001`
 - App Postgres: `localhost:5432`
+- Event handler: consumes MinIO object-created events and starts workflows
 
 Stop and clean:
 
@@ -123,21 +125,22 @@ In CI, injected environment variables can override `.env` values.
 
 When you call `POST /v1/documents`:
 
-1. API reads the multipart file into memory and starts `DocumentIntakeWorkflow` in Temporal.
-2. Worker picks up workflow tasks from Temporal task queue.
-3. `StoreDocumentActivity` writes file bytes to MinIO bucket (`documents`) with object key `document_id/filename`.
+1. API reads multipart file and uploads bytes to MinIO bucket (`documents`) under object key `document_id/filename`.
+2. MinIO emits `ObjectCreated` event for that object.
+3. `event-handler` consumes the event and starts `DocumentIntakeWorkflow` in Temporal.
+4. Worker picks up workflow tasks and reads object bytes from MinIO during `StoreDocumentActivity`.
 
 Trigger direction (important):
 
-- API upload request -> Temporal workflow start -> worker activity -> MinIO write.
-- Not MinIO upload -> workflow start.
-- If someone uploads a file directly to MinIO, this application does not auto-start a workflow.
+- API upload request -> MinIO write -> MinIO event -> event-handler -> Temporal workflow start -> worker activity.
+- Workflow start is asynchronous from API response.
+- API service does not subscribe to MinIO events.
 
 Notes:
 
 - MinIO here is object storage, similar to AWS S3 or Google Cloud Storage buckets.
-- There is no event listener on MinIO in this design.
-- Worker does not "listen to bucket uploads"; it is driven by Temporal workflow tasks.
+- `event-handler` is the MinIO event listener in this design.
+- Worker still does not "listen to bucket uploads"; it is driven by Temporal workflow tasks.
 - Review decisions are sent as Temporal signals via API endpoint `POST /v1/documents/{documentId}/review`.
 
 ## Local Run without Docker Compose
@@ -166,6 +169,7 @@ Environment variables:
 Run API and worker:
 
 ```bash
+make run-event-handler
 make run-worker
 make run-api
 ```
@@ -183,7 +187,7 @@ System blackbox test covers:
 
 - Real HTTP file upload to API
 - Real Temporal worker execution (no in-memory activity registration)
-- Real Temporal client signal (`reviewDecision`) against running workflow
+- Real review approval via API (`POST /v1/documents/{id}/review`) which signals Temporal workflow
 - Workflow history verification via Temporal SDK client
 
 Run tests:

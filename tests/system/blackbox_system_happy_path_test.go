@@ -62,10 +62,16 @@ var _ = Describe("System blackbox happy path", Ordered, func() {
 		Expect(upload.Status).To(Equal(domain.StatusReceived))
 
 		By("sending review approval via API (API then signals Temporal workflow)")
-		reviewAck, err := submitReviewDecision(apiBaseURL, upload.DocumentID, domain.ReviewDecisionApprove, "system-blackbox")
-		Expect(err).ToNot(HaveOccurred())
+		var reviewAck reviewSubmitResponse
+		Eventually(func() string {
+			var submitErr error
+			reviewAck, submitErr = submitReviewDecision(apiBaseURL, upload.DocumentID, domain.ReviewDecisionApprove, "system-blackbox")
+			if submitErr != nil {
+				return ""
+			}
+			return reviewAck.Status
+		}, cfg.WorkflowCompletionTimeout, cfg.WorkflowPollInterval).Should(Equal("review_signal_sent"))
 		Expect(reviewAck.DocumentID).To(Equal(upload.DocumentID))
-		Expect(reviewAck.Status).To(Equal("review_signal_sent"))
 
 		By("polling workflow status until completion")
 		var lastStatus statusResponse
@@ -117,7 +123,8 @@ var _ = Describe("System blackbox happy path", Ordered, func() {
 		storeIn := trace.Inputs["StoreDocumentActivity"].(appTemporal.StoreDocumentInput)
 		Expect(storeIn.DocumentID).To(Equal(upload.DocumentID))
 		Expect(storeIn.Filename).To(Equal(filepath.Base(filePath)))
-		Expect(storeIn.Content).To(Equal(uploadedFile))
+		Expect(storeIn.ObjectKey).To(Equal(upload.DocumentID + "/" + filepath.Base(filePath)))
+		Expect(storeIn.Content).To(BeEmpty())
 
 		storeOut := trace.Outputs["StoreDocumentActivity"].(appTemporal.StoreDocumentOutput)
 		Expect(storeOut.ObjectKey).To(Equal(upload.DocumentID + "/" + filepath.Base(filePath)))
