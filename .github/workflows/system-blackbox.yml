@@ -26,32 +26,51 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate OpenAI key availability
+      - name: Detect OpenAI key availability
+        id: key_check
         run: |
-          if [ -z "$OPENAI_API_KEY" ]; then
-            echo "OPENAI_API_KEY is required for real LLM blackbox tests." >&2
-            exit 1
+          if [ -n "$OPENAI_API_KEY" ]; then
+            echo "has_key=true" >> "$GITHUB_OUTPUT"
+            echo "OpenAI key detected; running full blackbox test."
+          else
+            echo "has_key=false" >> "$GITHUB_OUTPUT"
+            echo "OpenAI key missing; skipping real LLM blackbox execution."
           fi
 
+      - name: Mark skipped run in summary
+        if: steps.key_check.outputs.has_key != 'true'
+        run: |
+          {
+            echo "## System Blackbox Test"
+            echo ""
+            echo "Status: skipped"
+            echo ""
+            echo "Reason: \`OPENAI_API_KEY\` repository secret is not configured."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Setup Go
+        if: steps.key_check.outputs.has_key == 'true'
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
           cache: true
 
       - name: Download Go modules
+        if: steps.key_check.outputs.has_key == 'true'
         run: go mod download
 
       - name: Start compose infrastructure (including api/worker)
+        if: steps.key_check.outputs.has_key == 'true'
         run: docker compose up -d app-postgres temporal-postgres temporal minio minio-setup api worker
 
       - name: Run system blackbox test
+        if: steps.key_check.outputs.has_key == 'true'
         run: go test -tags=system ./tests/system -run TestBlackboxSystem -count=1 -v
 
       - name: Dump compose logs on failure
-        if: failure()
+        if: failure() && steps.key_check.outputs.has_key == 'true'
         run: docker compose logs --no-color --timestamps
 
       - name: Tear down compose stack
-        if: always()
+        if: always() && steps.key_check.outputs.has_key == 'true'
         run: docker compose down -v
