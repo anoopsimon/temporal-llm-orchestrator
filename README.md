@@ -127,6 +127,12 @@ When you call `POST /v1/documents`:
 2. Worker picks up workflow tasks from Temporal task queue.
 3. `StoreDocumentActivity` writes file bytes to MinIO bucket (`documents`) with object key `document_id/filename`.
 
+Trigger direction (important):
+
+- API upload request -> Temporal workflow start -> worker activity -> MinIO write.
+- Not MinIO upload -> workflow start.
+- If someone uploads a file directly to MinIO, this application does not auto-start a workflow.
+
 Notes:
 
 - MinIO here is object storage, similar to AWS S3 or Google Cloud Storage buckets.
