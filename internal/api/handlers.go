@@ -84,6 +84,8 @@ func (h *Handler) UploadDocument(w http.ResponseWriter, r *http.Request) {
 	}
 
 	workflowID := h.workflowID(documentID)
+	// Upload endpoint does not write directly to MinIO. It starts the Temporal workflow
+	// with raw file bytes, and the worker's StoreDocumentActivity persists those bytes to object storage.
 	_, err = h.temporalClient.ExecuteWorkflow(ctx, client.StartWorkflowOptions{
 		ID:        workflowID,
 		TaskQueue: h.cfg.TemporalTaskQueue,
@@ -171,6 +173,8 @@ func (h *Handler) SubmitReview(w http.ResponseWriter, r *http.Request, documentI
 		Reviewer:    req.Reviewer,
 		Reason:      req.Reason,
 	}
+	// Review endpoint sends a Temporal signal to an already-running workflow.
+	// Signals do not start workflows; UploadDocument starts the workflow.
 	if err := h.temporalClient.SignalWorkflow(r.Context(), h.workflowID(documentID), "", appTemporal.ReviewDecisionSignalName, signal); err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "failed to signal workflow"})
 		return

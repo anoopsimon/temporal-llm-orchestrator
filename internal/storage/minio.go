@@ -15,6 +15,7 @@ type MinioStore struct {
 	bucket string
 }
 
+// MinioStore is an S3-compatible object storage adapter (local equivalent of an S3/GCS bucket).
 func NewMinioStore(endpoint, accessKey, secretKey string, useSSL bool, bucket string) (*MinioStore, error) {
 	client, err := minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
@@ -39,6 +40,7 @@ func NewMinioStore(endpoint, accessKey, secretKey string, useSSL bool, bucket st
 }
 
 func (m *MinioStore) PutDocument(ctx context.Context, documentID, filename string, content []byte) (string, error) {
+	// Files are stored under "document_id/filename" so workflow records can reference object_key.
 	objectKey := path.Join(documentID, filename)
 	_, err := m.client.PutObject(ctx, m.bucket, objectKey, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{
 		ContentType: "application/octet-stream",

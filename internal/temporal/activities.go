@@ -144,6 +144,8 @@ func (a *Activities) StoreDocumentActivity(ctx context.Context, input StoreDocum
 		return StoreDocumentOutput{}, err
 	}
 
+	// This is where uploaded file bytes are persisted to object storage.
+	// No MinIO trigger/listener is used; the Temporal worker calls storage explicitly.
 	objectKey, err := a.Blob.PutDocument(ctx, input.DocumentID, input.Filename, input.Content)
 	if err != nil {
 		return StoreDocumentOutput{}, err

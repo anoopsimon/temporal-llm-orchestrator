@@ -119,6 +119,21 @@ make compose-down
 Docker Compose loads `.env` automatically and `api`/`worker` also reference it via `env_file`.
 In CI, injected environment variables can override `.env` values.
 
+## Where Uploads Go
+
+When you call `POST /v1/documents`:
+
+1. API reads the multipart file into memory and starts `DocumentIntakeWorkflow` in Temporal.
+2. Worker picks up workflow tasks from Temporal task queue.
+3. `StoreDocumentActivity` writes file bytes to MinIO bucket (`documents`) with object key `document_id/filename`.
+
+Notes:
+
+- MinIO here is object storage, similar to AWS S3 or Google Cloud Storage buckets.
+- There is no event listener on MinIO in this design.
+- Worker does not "listen to bucket uploads"; it is driven by Temporal workflow tasks.
+- Review decisions are sent as Temporal signals via API endpoint `POST /v1/documents/{documentId}/review`.
+
 ## Local Run without Docker Compose
 
 Prerequisites:
