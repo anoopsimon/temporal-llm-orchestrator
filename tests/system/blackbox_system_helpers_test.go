@@ -333,6 +333,21 @@ func collectActivityTrace(ctx context.Context, temporalClient client.Client, wor
 	return trace, nil
 }
 
+func collectWorkflowSignalNames(ctx context.Context, temporalClient client.Client, workflowID string) ([]string, error) {
+	var signalNames []string
+	iter := temporalClient.GetWorkflowHistory(ctx, workflowID, "", false, enumspb.HISTORY_EVENT_FILTER_TYPE_ALL_EVENT)
+	for iter.HasNext() {
+		event, err := iter.Next()
+		if err != nil {
+			return nil, err
+		}
+		if signaled := event.GetWorkflowExecutionSignaledEventAttributes(); signaled != nil {
+			signalNames = append(signalNames, signaled.GetSignalName())
+		}
+	}
+	return signalNames, nil
+}
+
 func decodeActivityInput(dc converter.DataConverter, name string, payloads *commonpb.Payloads) (any, error) {
 	if payloads == nil {
 		return nil, nil

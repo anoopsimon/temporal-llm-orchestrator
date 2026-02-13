@@ -158,16 +158,11 @@ Unit tests cover:
 - Strict JSON parsing into structs
 - Repair path where invalid JSON is corrected
 
-Integration test covers:
-
-- Full Temporal workflow path
-- NEEDS_REVIEW state
-- Human review signal `approve` to complete
-
 System blackbox test covers:
 
 - Real HTTP file upload to API
 - Real Temporal worker execution (no in-memory activity registration)
+- Real Temporal client signal (`reviewDecision`) against running workflow
 - Workflow history verification via Temporal SDK client
 
 Run tests:
