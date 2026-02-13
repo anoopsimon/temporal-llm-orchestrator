@@ -32,27 +32,9 @@ Upload document via API
 
 Architecture diagram:
 
-```mermaid
-flowchart TD
-  U[Upload file via API] --> M[(MinIO documents bucket)]
-  M --> E[event-handler listens for s3:ObjectCreated:*]
-  E --> W[Temporal Document Workflow]
-  W --> S[StoreDocumentActivity]
-  S --> D[DetectDocTypeActivity]
-  D --> A[Phase A: Base Extraction]
-  A -->|JSON invalid| B[Phase B: JSON Repair]
-  A -->|JSON valid| V[Validate Rules and Confidence]
-  B --> V
-  V -->|failed rules or confidence < 0.75| C[Phase C: Rule Correction]
-  C --> RV[Re-Validate]
-  RV -->|still risky| RQ[Queue Human Review]
-  RQ --> SG[Wait for Review Signal]
-  SG -->|approve| P[PersistResultActivity]
-  SG -->|reject| X[RejectDocumentActivity]
-  SG -->|correct| RV
-  V -->|valid and confidence >= 0.75| P
-  P --> DB[(Postgres final result and audit)]
-```
+![Event-driven architecture diagram](/diagrams/intake-architecture.svg)
+
+Source file: `docs/public/diagrams/intake-architecture.svg`
 
 Workflow orchestration entrypoint:
 
