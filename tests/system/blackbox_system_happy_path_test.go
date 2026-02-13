@@ -50,7 +50,7 @@ var _ = Describe("System blackbox happy path", Ordered, func() {
 		apiBaseURL := strings.TrimRight(cfg.APIBaseURL, "/")
 
 		By("uploading a document exactly like a user")
-		// The upload API starts workflow execution. The worker persists bytes to MinIO in StoreDocumentActivity.
+		// Upload stores bytes in MinIO; event-handler starts the workflow from MinIO object-created notifications.
 		filePath := filepath.Join(repoRoot, cfg.UploadFixturePath)
 		uploadedFile, err := os.ReadFile(filePath)
 		Expect(err).ToNot(HaveOccurred())

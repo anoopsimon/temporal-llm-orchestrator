@@ -14,8 +14,11 @@ If confidence is not good, it routes to human review.
 ## How It Works (Big Picture)
 
 ```text
-Upload document
-  -> Temporal workflow starts
+Upload document via API
+  -> API writes object to MinIO bucket
+  -> MinIO emits ObjectCreated event
+  -> event-handler starts Temporal workflow
+  -> workflow runs in worker
   -> Store + classify
   -> Phase A (extract)
   -> if broken JSON: Phase B (repair)
@@ -29,7 +32,9 @@ Architecture diagram:
 
 ```mermaid
 flowchart TD
-  U[Upload file via API] --> W[Temporal Document Workflow]
+  U[Upload file via API] --> M[(MinIO documents bucket)]
+  M --> E[event-handler listens for s3:ObjectCreated:*]
+  E --> W[Temporal Document Workflow]
   W --> S[StoreDocumentActivity]
   S --> D[DetectDocTypeActivity]
   D --> A[Phase A: Base Extraction]
@@ -182,15 +187,21 @@ require.NoError(t, err)
 require.Equal(t, 0.9, out.Confidence)
 ```
 
-3. Workflow integration test
-- low-confidence path enters review and approve signal completes workflow:
+3. System blackbox test (real infra)
+- uploads through API, submits review through API, then validates workflow history via Temporal SDK client:
 
 ```go
-// internal/temporal/workflows_integration_test.go
-env.SignalWorkflow(ReviewDecisionSignalName, ReviewDecisionSignal{
-  Decision: domain.ReviewDecisionApprove,
-  Reviewer: "qa",
-})
+// tests/system/blackbox_system_happy_path_test.go
+upload, err := uploadFile(apiBaseURL, filePath)
+Expect(err).ToNot(HaveOccurred())
+
+reviewAck, err := submitReviewDecision(apiBaseURL, upload.DocumentID, domain.ReviewDecisionApprove, "system-blackbox")
+Expect(err).ToNot(HaveOccurred())
+Expect(reviewAck.Status).To(Equal("review_signal_sent"))
+
+trace, err := collectActivityTrace(context.Background(), temporalClient, upload.WorkflowID)
+Expect(err).ToNot(HaveOccurred())
+Expect(trace.CompletedOrder).To(Equal(cfg.ExpectedActivityOrder))
 ```
 
 ## Why Braintrust Is Used
@@ -241,7 +252,8 @@ Phase-by-phase checks:
 1. Upload started
 - Call `POST /v1/documents` with a file.
 - Response gives `document_id` and `workflow_id`.
-- This means intake was accepted and workflow started.
+- This means intake was accepted and object was written to MinIO.
+- Workflow start happens asynchronously when `event-handler` receives MinIO `ObjectCreated` notification.
 
 2. Workflow progress
 - Poll `GET /v1/documents/{documentId}/status`.

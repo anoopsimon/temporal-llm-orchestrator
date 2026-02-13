@@ -136,6 +136,12 @@ Trigger direction (important):
 - Workflow start is asynchronous from API response.
 - API service does not subscribe to MinIO events.
 
+How MinIO event listening is wired:
+
+- `cmd/event-handler/main.go` starts a long-running listener process.
+- `internal/events/minio_source.go` uses MinIO `ListenBucketNotification` with `s3:ObjectCreated:*`.
+- Each object key is parsed as `document_id/filename`, then `event-handler` starts `DocumentIntakeWorkflow` with workflow ID `doc-intake-{document_id}`.
+
 Notes:
 
 - MinIO here is object storage, similar to AWS S3 or Google Cloud Storage buckets.

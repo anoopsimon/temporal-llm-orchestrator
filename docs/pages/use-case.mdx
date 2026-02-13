@@ -30,12 +30,14 @@ So the bank gets speed from AI, but keeps risk controls and traceability.
 ## A Simple Story
 
 1. A customer uploads a payslip.
-2. Workflow stores file, detects document type, and runs LLM Phase A extraction.
-3. If JSON is broken, Phase B repairs the output.
-4. If values look wrong by rules, Phase C tries correction.
-5. If still low confidence, case goes to reviewer queue.
-6. Reviewer approves, rejects, or corrects.
-7. Final result is saved with full audit trail.
+2. API stores the file in MinIO object storage (bucket `documents`).
+3. MinIO emits an object-created event, and `event-handler` starts the Temporal workflow.
+4. Workflow stores file metadata, detects document type, and runs LLM Phase A extraction.
+5. If JSON is broken, Phase B repairs the output.
+6. If values look wrong by rules, Phase C tries correction.
+7. If still low confidence, case goes to reviewer queue.
+8. Reviewer approves, rejects, or corrects through API.
+9. Final result is saved with full audit trail.
 
 ## Where This Is Useful
 
@@ -52,4 +54,3 @@ So the bank gets speed from AI, but keeps risk controls and traceability.
 - clear evidence of what AI produced and what humans approved
 
 Next: [Storytelling Flow](/storytelling-flow)
-
