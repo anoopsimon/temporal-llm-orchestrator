@@ -222,38 +222,12 @@ func uploadFile(apiBaseURL string, filePath string) (uploadResponse, error) {
 		return uploadResponse{}, err
 	}
 
-	var body bytes.Buffer
-	writer := multipart.NewWriter(&body)
-	part, err := writer.CreateFormFile("file", filepath.Base(filePath))
+	statusCode, payload, err := postMultipartFile(apiBaseURL, filepath.Base(filePath), fileBytes)
 	if err != nil {
 		return uploadResponse{}, err
 	}
-	if _, err := part.Write(fileBytes); err != nil {
-		return uploadResponse{}, err
-	}
-	if err := writer.Close(); err != nil {
-		return uploadResponse{}, err
-	}
-
-	req, err := http.NewRequest(http.MethodPost, strings.TrimRight(apiBaseURL, "/")+"/v1/documents", &body)
-	if err != nil {
-		return uploadResponse{}, err
-	}
-	req.Header.Set("Content-Type", writer.FormDataContentType())
-
-	client := &http.Client{Timeout: 15 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return uploadResponse{}, err
-	}
-	defer resp.Body.Close()
-
-	payload, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return uploadResponse{}, err
-	}
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return uploadResponse{}, fmt.Errorf("upload failed: status=%d body=%s", resp.StatusCode, strings.TrimSpace(string(payload)))
+	if statusCode < 200 || statusCode >= 300 {
+		return uploadResponse{}, fmt.Errorf("upload failed: status=%d body=%s", statusCode, strings.TrimSpace(string(payload)))
 	}
 
 	var out uploadResponse
@@ -261,6 +235,55 @@ func uploadFile(apiBaseURL string, filePath string) (uploadResponse, error) {
 		return uploadResponse{}, err
 	}
 	return out, nil
+}
+
+func uploadFileExpectStatus(apiBaseURL string, filePath string, expectedStatus int) (string, error) {
+	fileBytes, err := os.ReadFile(filePath)
+	if err != nil {
+		return "", err
+	}
+	statusCode, payload, err := postMultipartFile(apiBaseURL, filepath.Base(filePath), fileBytes)
+	if err != nil {
+		return "", err
+	}
+	if statusCode != expectedStatus {
+		return "", fmt.Errorf("upload failed: expected status=%d got=%d body=%s", expectedStatus, statusCode, strings.TrimSpace(string(payload)))
+	}
+	return string(payload), nil
+}
+
+func postMultipartFile(apiBaseURL string, uploadFilename string, fileBytes []byte) (int, []byte, error) {
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+	part, err := writer.CreateFormFile("file", uploadFilename)
+	if err != nil {
+		return 0, nil, err
+	}
+	if _, err := part.Write(fileBytes); err != nil {
+		return 0, nil, err
+	}
+	if err := writer.Close(); err != nil {
+		return 0, nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, strings.TrimRight(apiBaseURL, "/")+"/v1/documents", &body)
+	if err != nil {
+		return 0, nil, err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	client := &http.Client{Timeout: 15 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return 0, nil, err
+	}
+	defer resp.Body.Close()
+
+	payload, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return 0, nil, err
+	}
+	return resp.StatusCode, payload, nil
 }
 
 func submitReviewDecision(apiBaseURL string, documentID string, decision domain.ReviewDecisionType, reviewer string) (reviewSubmitResponse, error) {

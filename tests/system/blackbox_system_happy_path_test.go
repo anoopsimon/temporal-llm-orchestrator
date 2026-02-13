@@ -5,6 +5,7 @@ package system_test
 import (
 	"context"
 	"database/sql"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -44,6 +45,21 @@ var _ = Describe("System blackbox happy path", Ordered, func() {
 		Expect(waitForHTTPStatus(strings.TrimRight(cfg.APIBaseURL, "/")+cfg.APIReadyPath, 200, cfg.PreflightTimeout)).To(Succeed())
 		Expect(waitForWorkerPoller(cfg.TemporalAddress, cfg.TemporalNamespace, cfg.TemporalTaskQueue, cfg.WorkerPollerTimeout)).To(Succeed())
 		Expect(applyMigration(repoRoot, cfg.PostgresDSN)).To(Succeed())
+	})
+
+	It("rejects scanned/image uploads until OCR ingestion is implemented", func() {
+		apiBaseURL := strings.TrimRight(cfg.APIBaseURL, "/")
+		unsupportedFixtures := []string{
+			"testdata/scanned_payslip.pdf",
+			"testdata/scanned_invoice.png",
+		}
+
+		for _, relPath := range unsupportedFixtures {
+			fixturePath := filepath.Join(repoRoot, relPath)
+			responseBody, err := uploadFileExpectStatus(apiBaseURL, fixturePath, http.StatusUnsupportedMediaType)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(responseBody).To(ContainSubstring("only UTF-8 text files are supported"))
+		}
 	})
 
 	It("uploads a real file over HTTP and completes the workflow via a real worker", func() {

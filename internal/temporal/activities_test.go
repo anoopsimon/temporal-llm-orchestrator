@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"os"
+	"path/filepath"
 	"sync"
 	"testing"
 	"time"
@@ -194,4 +196,26 @@ func TestExtractFieldsWithRepairPath(t *testing.T) {
 	require.Equal(t, 0.9, out.Confidence)
 	require.Len(t, llm.calls, 2)
 	require.Equal(t, []string{modelOutputPhaseBase1, modelOutputPhaseRepair1}, store.modelPhases["doc-1"])
+}
+
+func TestDetectDocTypeFromSampleTextFixtures(t *testing.T) {
+	t.Parallel()
+
+	emailPayslipText := mustReadTestdataFixture(t, "email_payslip.txt")
+	if got := detectDocType(emailPayslipText, "email_payslip.txt"); got != domain.DocTypePayslip {
+		t.Fatalf("detectDocType(email_payslip.txt) = %s, want %s", got, domain.DocTypePayslip)
+	}
+
+	portalInvoiceText := mustReadTestdataFixture(t, "portal_invoice.txt")
+	if got := detectDocType(portalInvoiceText, "portal_invoice.txt"); got != domain.DocTypeInvoice {
+		t.Fatalf("detectDocType(portal_invoice.txt) = %s, want %s", got, domain.DocTypeInvoice)
+	}
+}
+
+func mustReadTestdataFixture(t *testing.T, name string) string {
+	t.Helper()
+	fixturePath := filepath.Join("..", "..", "testdata", name)
+	b, err := os.ReadFile(fixturePath)
+	require.NoError(t, err)
+	return string(b)
 }

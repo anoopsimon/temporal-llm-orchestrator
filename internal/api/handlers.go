@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -8,7 +9,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 	"go.temporal.io/sdk/client"
@@ -79,6 +82,12 @@ func (h *Handler) UploadDocument(w http.ResponseWriter, r *http.Request) {
 	}
 	if int64(len(body)) > h.cfg.AllowedUploadBytes {
 		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "file exceeds size limit"})
+		return
+	}
+	if !isSupportedTextUpload(body) {
+		writeJSON(w, http.StatusUnsupportedMediaType, map[string]any{
+			"error": "unsupported file type: only UTF-8 text files are supported; OCR for PDF/image files is not implemented",
+		})
 		return
 	}
 
@@ -177,7 +186,7 @@ func (h *Handler) SubmitReview(w http.ResponseWriter, r *http.Request, documentI
 		Reason:      req.Reason,
 	}
 	// Review endpoint sends a Temporal signal to an already-running workflow.
-	// Signals do not start workflows; UploadDocument starts the workflow.
+	// Signals do not start workflows; event-handler starts workflows on MinIO object-created events.
 	if err := h.temporalClient.SignalWorkflow(r.Context(), h.workflowID(documentID), "", appTemporal.ReviewDecisionSignalName, signal); err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "failed to signal workflow"})
 		return
@@ -220,4 +229,26 @@ func writeJSON(w http.ResponseWriter, status int, payload any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(payload)
+}
+
+func isSupportedTextUpload(body []byte) bool {
+	if len(body) == 0 {
+		return false
+	}
+	if !utf8.Valid(body) {
+		return false
+	}
+	if bytes.IndexByte(body, 0x00) >= 0 {
+		return false
+	}
+	if strings.TrimSpace(string(body)) == "" {
+		return false
+	}
+
+	sniffLen := len(body)
+	if sniffLen > 512 {
+		sniffLen = 512
+	}
+	contentType := http.DetectContentType(body[:sniffLen])
+	return strings.HasPrefix(contentType, "text/")
 }

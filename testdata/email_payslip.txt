@@ -1,0 +1,10 @@
+From: payroll@acmebank.example
+To: applicant@example.com
+Subject: Monthly payslip
+
+Employee Name: Jane Doe
+Employer Name: ACME Bank
+Pay Period: 2025-01-01 to 2025-01-31
+Gross Pay: 5200.00
+Net Pay: 4100.00
+Tax Withheld: 1100.00

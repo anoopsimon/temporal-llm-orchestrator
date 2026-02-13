@@ -1,0 +1,7 @@
+Portal Export
+Supplier: Contoso Services LLC
+Invoice Number: INV-2025-044
+Invoice Date: 2025-01-15
+Due Date: 2025-02-14
+Total Amount: 1840.50
+Currency: USD

@@ -73,6 +73,19 @@ The orchestration ladder is implemented in `internal/temporal/workflows.go` and 
 - `GET /healthz`
 - `GET /readyz`
 
+## Current Input Support
+
+- Supported now: UTF-8 plain text files (for example `.txt`, copied email body text, portal-exported text).
+- Not supported yet: scanned/image/PDF ingestion without OCR.
+- API rejects non-text uploads with `415 Unsupported Media Type` and a clear error.
+
+Sample fixtures in `testdata/`:
+
+- `email_payslip.txt`
+- `portal_invoice.txt`
+- `scanned_payslip.pdf` (negative-path sample)
+- `scanned_invoice.png` (negative-path sample)
+
 ## Review Signal Contract
 
 `POST /v1/documents/{documentId}/review` body:
@@ -192,6 +205,7 @@ Unit tests cover:
 System blackbox test covers:
 
 - Real HTTP file upload to API
+- Real API validation that rejects scanned/image uploads with `415`
 - Real Temporal worker execution (no in-memory activity registration)
 - Real review approval via API (`POST /v1/documents/{id}/review`) which signals Temporal workflow
 - Workflow history verification via Temporal SDK client
