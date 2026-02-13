@@ -1,4 +1,8 @@
 # AI Document Intake and Decision Workflow
+[![System Blackbox Test](https://github.com/anoopsimon/temporal-llm-orchestrator/actions/workflows/system-blackbox.yml/badge.svg)](https://github.com/anoopsimon/temporal-llm-orchestrator/actions/workflows/system-blackbox.yml)
+
+Build Status: green
+Document Status: Up to date
 
 This repository implements an AI document intake pipeline with Go, Temporal, OpenAI, Postgres, and MinIO.
 
@@ -160,11 +164,25 @@ Integration test covers:
 - NEEDS_REVIEW state
 - Human review signal `approve` to complete
 
+System blackbox test covers:
+
+- Real HTTP file upload to API
+- Real Temporal worker execution (no in-memory activity registration)
+- Workflow history verification via Temporal SDK client
+
 Run tests:
 
 ```bash
 make test
 ```
+
+Run the full blackbox system test:
+
+```bash
+make test-blackbox
+```
+
+`test-blackbox` assumes the compose stack is already running, including `api` and `worker`, and fails fast if not.
 
 Run one end to end workflow from shell:
 

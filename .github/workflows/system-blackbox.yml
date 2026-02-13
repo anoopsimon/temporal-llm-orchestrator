@@ -1,0 +1,57 @@
+name: System Blackbox Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  blackbox:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: gpt-4o-mini
+      RUN_BLACKBOX_SYSTEM_TEST: "1"
+      SYSTEM_TEST_PREFLIGHT_TIMEOUT: 120s
+      SYSTEM_TEST_WORKER_POLLER_TIMEOUT: 180s
+      SYSTEM_TEST_WORKFLOW_TIMEOUT: 240s
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate OpenAI key availability
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "OPENAI_API_KEY is required for real LLM blackbox tests." >&2
+            exit 1
+          fi
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Download Go modules
+        run: go mod download
+
+      - name: Start compose infrastructure (including api/worker)
+        run: docker compose up -d app-postgres temporal-postgres temporal minio minio-setup api worker
+
+      - name: Run system blackbox test
+        run: go test -tags=system ./tests/system -run TestBlackboxSystem -count=1 -v
+
+      - name: Dump compose logs on failure
+        if: failure()
+        run: docker compose logs --no-color --timestamps
+
+      - name: Tear down compose stack
+        if: always()
+        run: docker compose down -v
