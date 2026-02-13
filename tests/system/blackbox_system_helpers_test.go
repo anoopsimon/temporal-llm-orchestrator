@@ -47,6 +47,11 @@ type resultResponse struct {
 	Result     map[string]any        `json:"result"`
 }
 
+type reviewSubmitResponse struct {
+	DocumentID string `json:"document_id"`
+	Status     string `json:"status"`
+}
+
 type activityTrace struct {
 	ScheduledOrder []string
 	CompletedOrder []string
@@ -253,6 +258,44 @@ func uploadFile(apiBaseURL string, filePath string) (uploadResponse, error) {
 	var out uploadResponse
 	if err := json.Unmarshal(payload, &out); err != nil {
 		return uploadResponse{}, err
+	}
+	return out, nil
+}
+
+func submitReviewDecision(apiBaseURL string, documentID string, decision domain.ReviewDecisionType, reviewer string) (reviewSubmitResponse, error) {
+	requestBody, err := json.Marshal(map[string]any{
+		"decision": decision,
+		"reviewer": reviewer,
+	})
+	if err != nil {
+		return reviewSubmitResponse{}, err
+	}
+
+	url := strings.TrimRight(apiBaseURL, "/") + "/v1/documents/" + documentID + "/review"
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(requestBody))
+	if err != nil {
+		return reviewSubmitResponse{}, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	httpClient := &http.Client{Timeout: 10 * time.Second}
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return reviewSubmitResponse{}, err
+	}
+	defer resp.Body.Close()
+
+	payload, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return reviewSubmitResponse{}, err
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return reviewSubmitResponse{}, fmt.Errorf("submit review failed: status=%d body=%s", resp.StatusCode, strings.TrimSpace(string(payload)))
+	}
+
+	var out reviewSubmitResponse
+	if err := json.Unmarshal(payload, &out); err != nil {
+		return reviewSubmitResponse{}, err
 	}
 	return out, nil
 }

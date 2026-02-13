@@ -60,19 +60,11 @@ var _ = Describe("System blackbox happy path", Ordered, func() {
 		Expect(upload.WorkflowID).ToNot(BeEmpty())
 		Expect(upload.Status).To(Equal(domain.StatusReceived))
 
-		temporalClient, err := client.Dial(client.Options{
-			HostPort:  cfg.TemporalAddress,
-			Namespace: cfg.TemporalNamespace,
-		})
+		By("sending review approval via API (API then signals Temporal workflow)")
+		reviewAck, err := submitReviewDecision(apiBaseURL, upload.DocumentID, domain.ReviewDecisionApprove, "system-blackbox")
 		Expect(err).ToNot(HaveOccurred())
-		defer temporalClient.Close()
-
-		By("sending a real Temporal signal via SDK client")
-		err = temporalClient.SignalWorkflow(context.Background(), upload.WorkflowID, "", appTemporal.ReviewDecisionSignalName, appTemporal.ReviewDecisionSignal{
-			Decision: domain.ReviewDecisionApprove,
-			Reviewer: "system-blackbox",
-		})
-		Expect(err).ToNot(HaveOccurred())
+		Expect(reviewAck.DocumentID).To(Equal(upload.DocumentID))
+		Expect(reviewAck.Status).To(Equal("review_signal_sent"))
 
 		By("polling workflow status until completion")
 		var lastStatus statusResponse
@@ -104,6 +96,12 @@ var _ = Describe("System blackbox happy path", Ordered, func() {
 		Expect(result.Result).To(HaveKeyWithValue("confidence", BeNumerically("<=", 1)))
 
 		By("validating activity inputs and outputs from Temporal workflow history")
+		temporalClient, err := client.Dial(client.Options{
+			HostPort:  cfg.TemporalAddress,
+			Namespace: cfg.TemporalNamespace,
+		})
+		Expect(err).ToNot(HaveOccurred())
+		defer temporalClient.Close()
 
 		trace, err := collectActivityTrace(context.Background(), temporalClient, upload.WorkflowID)
 		Expect(err).ToNot(HaveOccurred())
