@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
@@ -35,10 +36,14 @@ func NewHTTPClient(apiKey string, model string) *HTTPClient {
 	if model == "" {
 		model = "gpt-4o-mini"
 	}
+	baseURL := strings.TrimSpace(os.Getenv("OPENAI_BASE_URL"))
+	if baseURL == "" {
+		baseURL = defaultBaseURL
+	}
 	return &HTTPClient{
 		apiKey:       apiKey,
 		defaultModel: model,
-		baseURL:      defaultBaseURL,
+		baseURL:      baseURL,
 		httpClient:   &http.Client{},
 	}
 }
