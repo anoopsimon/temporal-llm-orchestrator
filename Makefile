@@ -8,6 +8,10 @@ export GOMODCACHE ?= /tmp/gomodcache
 test:
 	go test ./...
 
+.PHONY: test-blackbox
+test-blackbox:
+	RUN_BLACKBOX_SYSTEM_TEST="$${RUN_BLACKBOX_SYSTEM_TEST:-1}" go test -tags=system ./tests/system -count=1 -v
+
 .PHONY: run-api
 run-api:
 	POSTGRES_DSN="$${POSTGRES_DSN:-postgres://postgres:postgres@localhost:5432/intake?sslmode=disable}" \
