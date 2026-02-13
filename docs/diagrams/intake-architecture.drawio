@@ -1,0 +1,109 @@
+<mxfile host="app.diagrams.net" modified="2026-02-13T00:00:00.000Z" agent="Codex" version="24.7.17" type="device">
+  <diagram id="intake-arch" name="Page-1">
+    <mxGraphModel dx="1600" dy="980" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="980" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="AI Document Intake - Event-Driven Runtime" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=28;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="40" y="30" width="760" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="subtitle" value="Upload -&gt; MinIO ObjectCreated -&gt; event-handler -&gt; Temporal workflow -&gt; worker activities" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=14;fontColor=#334155;" vertex="1" parent="1">
+          <mxGeometry x="40" y="70" width="900" height="26" as="geometry" />
+        </mxCell>
+
+        <mxCell id="user" value="User / Client&#xa;Portal upload or pasted email text" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#60a5fa;strokeWidth=2;fontSize=15;fontStyle=1;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="170" width="240" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="api" value="API Service&#xa;POST /v1/documents&#xa;stores file in MinIO" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#60a5fa;strokeWidth=2;fontSize=15;fontStyle=1;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="360" y="170" width="250" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="minio" value="MinIO Bucket&#xa;object key: document_id/filename&#xa;emits ObjectCreated event" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fff9;strokeColor=#34d399;strokeWidth=2;fontSize=15;fontStyle=1;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="680" y="170" width="300" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="eventhandler" value="event-handler&#xa;ListenBucketNotification&#xa;s3:ObjectCreated:*" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#818cf8;strokeWidth=2;fontSize=15;fontStyle=1;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="680" y="340" width="300" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="workflow" value="Temporal Workflow&#xa;DocumentIntakeWorkflow&#xa;ID: doc-intake-{document_id}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#6366f1;strokeWidth=2;fontSize=15;fontStyle=1;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="170" width="360" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="worker" value="Worker Activities&#xa;StoreDocument -&gt; DetectDocType -&gt; Extract/Repair/Correct -&gt; Validate -&gt; Persist/Reject" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#3b82f6;strokeWidth=2;fontSize=15;fontStyle=1;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="340" width="470" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="openai" value="OpenAI API&#xa;BASE / REPAIR / CORRECT prompts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#8b5cf6;strokeWidth=2;fontSize=15;fontStyle=1;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="680" y="580" width="300" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="postgres" value="Postgres&#xa;documents, extraction_attempts, audit_log, review_queue" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#0ea5e9;strokeWidth=2;fontSize=15;fontStyle=1;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="580" width="470" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="reviewer" value="Reviewer&#xa;Approve / Reject / Correct" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#f59e0b;strokeWidth=2;fontSize=15;fontStyle=1;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="510" width="240" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="reviewapi" value="Review API&#xa;POST /v1/documents/{id}/review&#xa;sends Temporal signal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#f59e0b;strokeWidth=2;fontSize=15;fontStyle=1;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="360" y="510" width="250" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="user" target="api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="api" target="minio">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e3" value="ObjectCreated" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#0f5cad;fontColor=#0f5cad;endArrow=block;endFill=1;" edge="1" parent="1" source="minio" target="eventhandler">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="eventhandler" target="workflow">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1010" y="390" />
+              <mxPoint x="1010" y="220" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="workflow" target="worker">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e6" value="LLM calls" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="worker" target="openai">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="worker" target="postgres">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="reviewer" target="reviewapi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e9" value="Temporal signal" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeWidth=2;strokeColor=#0f5cad;fontColor=#0f5cad;endArrow=block;endFill=1;" edge="1" parent="1" source="reviewapi" target="workflow">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="800" y="555" />
+              <mxPoint x="990" y="555" />
+              <mxPoint x="990" y="220" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="note" value="Current scope: UTF-8 text intake.&#xa;Scanned/image/PDF requires OCR before ingestion." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#cbd5e1;fontSize=13;fontColor=#334155;" vertex="1" parent="1">
+          <mxGeometry x="60" y="710" width="620" height="70" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
