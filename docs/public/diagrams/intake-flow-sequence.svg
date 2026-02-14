@@ -91,7 +91,7 @@
   <path d="M1390 850 C1440 850, 1440 935, 590 935" stroke="#0f5cad" stroke-width="3" fill="none" marker-end="url(#arrowBlue)"/>
   <text x="1410" y="875" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="14" fill="#0f5cad">to validate</text>
 
-  <path d="M760 1030 L760 1060" stroke="#334155" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M760 1100 L760 1140" stroke="#334155" stroke-width="3" marker-end="url(#arrow)"/>
 
   <path d="M890 1030 L980 1030" stroke="#0f5cad" stroke-width="3" marker-end="url(#arrowBlue)"/>
   <text x="914" y="1012" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="14" fill="#0f5cad">yes</text>
@@ -103,13 +103,13 @@
   <path d="M1390 1210 C1440 1210, 1440 1295, 590 1295" stroke="#0f5cad" stroke-width="3" fill="none" marker-end="url(#arrowBlue)"/>
   <text x="1410" y="1234" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="14" fill="#0f5cad">review done</text>
 
-  <path d="M760 850 C620 850, 620 935, 590 935" stroke="#334155" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <path d="M630 850 C620 850, 620 935, 590 935" stroke="#334155" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
   <text x="622" y="870" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">no</text>
 
-  <path d="M760 1030 C620 1030, 620 1295, 590 1295" stroke="#334155" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <path d="M630 1030 C620 1030, 620 1295, 590 1295" stroke="#334155" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
   <text x="622" y="1052" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">no</text>
 
-  <path d="M760 1210 C620 1210, 620 1295, 590 1295" stroke="#334155" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <path d="M630 1210 C620 1210, 620 1295, 590 1295" stroke="#334155" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
   <text x="622" y="1232" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">no</text>
 
   <rect x="48" y="1400" width="1404" height="56" rx="12" fill="#ffffff" stroke="#cbd5e1"/>
