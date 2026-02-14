@@ -151,7 +151,7 @@ Trigger direction (important):
 
 End-to-end flow diagram:
 
-![End-to-end intake flow](docs/public/diagrams/intake-flow-sequence.svg)
+<img src="docs/public/diagrams/intake-flow-sequence.svg" alt="End-to-end intake flow" width="1000" />
 
 Diagram source files:
 

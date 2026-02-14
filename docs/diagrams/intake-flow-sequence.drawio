@@ -1,29 +1,32 @@
 <mxfile host="app.diagrams.net" modified="2026-02-14T00:00:00.000Z" agent="Codex" version="24.7.17" type="device">
   <diagram id="intake-flow-seq" name="Page-1">
-    <mxGraphModel dx="1500" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="1200" math="0" shadow="0">
+    <mxGraphModel dx="1500" dy="1500" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="1500" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
 
         <mxCell id="title" value="End-to-End Flow (Pictorial)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=26;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="40" y="30" width="500" height="40" as="geometry" />
+          <mxGeometry x="40" y="30" width="560" height="40" as="geometry" />
         </mxCell>
 
-        <mxCell id="n1" value="1. Upload document via API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#60a5fa;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="80" y="110" width="420" height="64" as="geometry" /></mxCell>
-        <mxCell id="n2" value="2. API writes object to MinIO bucket" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#60a5fa;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="80" y="210" width="420" height="64" as="geometry" /></mxCell>
-        <mxCell id="n3" value="3. MinIO emits ObjectCreated event" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fff9;strokeColor=#34d399;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="80" y="310" width="420" height="64" as="geometry" /></mxCell>
-        <mxCell id="n4" value="4. event-handler starts Temporal workflow" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#818cf8;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="80" y="410" width="420" height="64" as="geometry" /></mxCell>
-        <mxCell id="n5" value="5. workflow runs in worker" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#6366f1;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="80" y="510" width="420" height="64" as="geometry" /></mxCell>
-        <mxCell id="n6" value="6. Store + classify (non-LLM)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#3b82f6;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="80" y="610" width="420" height="64" as="geometry" /></mxCell>
-        <mxCell id="n7" value="7. Phase A (extract, AI/LLM)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#8b5cf6;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="80" y="710" width="420" height="64" as="geometry" /></mxCell>
-        <mxCell id="d1" value="Broken JSON?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#334155;strokeWidth=2;fontSize=15;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="620" y="700" width="180" height="90" as="geometry" /></mxCell>
-        <mxCell id="n8" value="8. Validate rules + confidence" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#0ea5e9;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="80" y="820" width="420" height="64" as="geometry" /></mxCell>
-        <mxCell id="n9" value="Phase B (repair, AI/LLM)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#f59e0b;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="900" y="713" width="260" height="64" as="geometry" /></mxCell>
-        <mxCell id="d2" value="Need correction?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#334155;strokeWidth=2;fontSize=15;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="620" y="910" width="180" height="90" as="geometry" /></mxCell>
-        <mxCell id="n10" value="10. Phase C (correct values, AI/LLM)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#f97316;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="900" y="923" width="300" height="64" as="geometry" /></mxCell>
-        <mxCell id="d3" value="Still risky?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#334155;strokeWidth=2;fontSize=15;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="620" y="1040" width="180" height="90" as="geometry" /></mxCell>
-        <mxCell id="n11" value="11. Human review loop" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#ef4444;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="900" y="1053" width="260" height="64" as="geometry" /></mxCell>
-        <mxCell id="n12" value="12. Final result persisted" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#0f766e;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="80" y="1060" width="420" height="64" as="geometry" /></mxCell>
+        <mxCell id="n1" value="1. Upload document via API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#60a5fa;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="90" y="120" width="500" height="70" as="geometry" /></mxCell>
+        <mxCell id="n2" value="2. API writes object to MinIO" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#60a5fa;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="90" y="220" width="500" height="70" as="geometry" /></mxCell>
+        <mxCell id="n3" value="3. MinIO emits ObjectCreated event" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fff9;strokeColor=#34d399;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="90" y="320" width="500" height="70" as="geometry" /></mxCell>
+        <mxCell id="n4" value="4. event-handler starts Temporal workflow" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#818cf8;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="90" y="420" width="500" height="70" as="geometry" /></mxCell>
+        <mxCell id="n5" value="5. Workflow runs in worker" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#6366f1;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="90" y="520" width="500" height="70" as="geometry" /></mxCell>
+        <mxCell id="n6" value="6. Store + classify (non-LLM)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#3b82f6;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="90" y="620" width="500" height="70" as="geometry" /></mxCell>
+        <mxCell id="n7" value="7. Phase A: extract (AI/LLM)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#8b5cf6;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="90" y="720" width="500" height="70" as="geometry" /></mxCell>
+        <mxCell id="n8" value="8. Validate rules + confidence" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#0ea5e9;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="90" y="900" width="500" height="70" as="geometry" /></mxCell>
+        <mxCell id="n12" value="12. Final result persisted" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fbff;strokeColor=#0f766e;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="90" y="1260" width="500" height="70" as="geometry" /></mxCell>
+
+        <mxCell id="d1" value="Broken JSON?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#334155;strokeWidth=2;fontSize=15;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="630" y="780" width="260" height="140" as="geometry" /></mxCell>
+        <mxCell id="n9" value="9. Phase B: repair JSON (AI/LLM)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#f59e0b;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="980" y="815" width="410" height="70" as="geometry" /></mxCell>
+
+        <mxCell id="d2" value="Need correction?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#334155;strokeWidth=2;fontSize=15;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="630" y="960" width="260" height="140" as="geometry" /></mxCell>
+        <mxCell id="n10" value="10. Phase C: correct values (AI/LLM)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#f97316;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="980" y="995" width="410" height="70" as="geometry" /></mxCell>
+
+        <mxCell id="d3" value="Still risky?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#334155;strokeWidth=2;fontSize=15;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="630" y="1140" width="260" height="140" as="geometry" /></mxCell>
+        <mxCell id="n11" value="11. Human review loop" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#ef4444;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="980" y="1175" width="410" height="70" as="geometry" /></mxCell>
 
         <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="n1" target="n2"><mxGeometry relative="1" as="geometry"/></mxCell>
         <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="n2" target="n3"><mxGeometry relative="1" as="geometry"/></mxCell>
@@ -31,17 +34,23 @@
         <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="n4" target="n5"><mxGeometry relative="1" as="geometry"/></mxCell>
         <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="n5" target="n6"><mxGeometry relative="1" as="geometry"/></mxCell>
         <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="n6" target="n7"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="n7" target="d1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="n7" target="d1"><mxGeometry relative="1" as="geometry"/></mxCell>
         <mxCell id="e8" value="yes" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;strokeColor=#0f5cad;fontColor=#0f5cad;endArrow=block;" edge="1" parent="1" source="d1" target="n9"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e9" value="no" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="d1" target="n8"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="580" y="745"/><mxPoint x="580" y="850"/></Array></mxGeometry></mxCell>
-        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;strokeWidth=2;strokeColor=#0f5cad;endArrow=block;" edge="1" parent="1" source="n9" target="n8"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1260" y="850"/></Array></mxGeometry></mxCell>
+        <mxCell id="e9" value="no" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="d1" target="n8"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="620" y="850"/><mxPoint x="620" y="935"/></Array></mxGeometry></mxCell>
+        <mxCell id="e10" value="to validate" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;strokeWidth=2;strokeColor=#0f5cad;fontColor=#0f5cad;endArrow=block;" edge="1" parent="1" source="n9" target="n8"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1440" y="850"/><mxPoint x="1440" y="935"/></Array></mxGeometry></mxCell>
+
         <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="n8" target="d2"><mxGeometry relative="1" as="geometry"/></mxCell>
         <mxCell id="e12" value="yes" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;strokeColor=#0f5cad;fontColor=#0f5cad;endArrow=block;" edge="1" parent="1" source="d2" target="n10"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e13" value="no" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="d2" target="n12"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="580" y="955"/><mxPoint x="580" y="1090"/></Array></mxGeometry></mxCell>
-        <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="n10" target="d3"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e15" value="yes" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;strokeColor=#0f5cad;fontColor=#0f5cad;endArrow=block;" edge="1" parent="1" source="d3" target="n11"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e16" value="no" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="d3" target="n12"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="580" y="1085"/><mxPoint x="580" y="1090"/></Array></mxGeometry></mxCell>
-        <mxCell id="e17" value="review complete" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;strokeWidth=2;strokeColor=#0f5cad;fontColor=#0f5cad;endArrow=block;" edge="1" parent="1" source="n11" target="n12"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1260" y="1090"/></Array></mxGeometry></mxCell>
+
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="n10" target="d3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e14" value="yes" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;strokeColor=#0f5cad;fontColor=#0f5cad;endArrow=block;" edge="1" parent="1" source="d3" target="n11"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e15" value="review done" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;strokeWidth=2;strokeColor=#0f5cad;fontColor=#0f5cad;endArrow=block;" edge="1" parent="1" source="n11" target="n12"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1440" y="1210"/><mxPoint x="1440" y="1295"/></Array></mxGeometry></mxCell>
+
+        <mxCell id="e16" value="no" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="d2" target="n12"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="620" y="1030"/><mxPoint x="620" y="1295"/></Array></mxGeometry></mxCell>
+        <mxCell id="e17" value="no" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="d3" target="n12"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="620" y="1210"/><mxPoint x="620" y="1295"/></Array></mxGeometry></mxCell>
+
+        <mxCell id="legend" value="Solid arrows: main/control flow | Blue arrows: branch paths (repair/correction/review)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#cbd5e1;fontSize=14;" vertex="1" parent="1"><mxGeometry x="50" y="1400" width="1400" height="56" as="geometry" /></mxCell>
       </root>
     </mxGraphModel>
   </diagram>
