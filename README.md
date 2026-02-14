@@ -202,6 +202,27 @@ make run-worker
 make run-api
 ```
 
+## Connect Postgres From VS Code
+
+This repo includes a checked-in VS Code SQLTools connection template:
+
+- `.vscode/extensions.json`
+- `.vscode/settings.json`
+
+Steps:
+
+1. Install recommended extensions when VS Code prompts (`SQLTools`, `SQLTools PostgreSQL Driver`).
+2. Start infra (`make compose-up`).
+3. Open SQLTools panel and connect to `Intake Postgres (Docker Local)`.
+4. Enter password when prompted: `postgres`.
+
+Connection values:
+
+- host: `127.0.0.1`
+- port: `5432`
+- db: `intake`
+- user: `postgres`
+
 ## Testing
 
 Unit tests cover:

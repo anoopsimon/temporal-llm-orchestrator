@@ -1,0 +1,16 @@
+{
+  "sqltools.useNodeRuntime": true,
+  "sqltools.connections": [
+    {
+      "name": "Intake Postgres (Docker Local)",
+      "driver": "PostgreSQL",
+      "previewLimit": 200,
+      "server": "127.0.0.1",
+      "port": 5432,
+      "database": "intake",
+      "username": "postgres",
+      "askForPassword": true,
+      "connectString": "postgresql://postgres@127.0.0.1:5432/intake?sslmode=disable"
+    }
+  ]
+}
