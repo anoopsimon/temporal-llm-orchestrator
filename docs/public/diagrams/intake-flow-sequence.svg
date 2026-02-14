@@ -44,10 +44,10 @@
     <text x="146" y="647" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700" fill="#0f172a">5. Workflow runs in worker</text>
 
     <rect x="120" y="720" width="420" height="74" rx="16" fill="url(#card)" stroke="#3b82f6" stroke-width="2"/>
-    <text x="146" y="765" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700" fill="#0f172a">6. Store + classify</text>
+    <text x="146" y="765" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700" fill="#0f172a">6. Store + classify (non-LLM)</text>
 
     <rect x="120" y="838" width="420" height="74" rx="16" fill="url(#card)" stroke="#8b5cf6" stroke-width="2"/>
-    <text x="146" y="883" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700" fill="#0f172a">7. Phase A: extract</text>
+    <text x="146" y="883" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700" fill="#0f172a">7. Phase A: extract (AI/LLM)</text>
 
     <rect x="120" y="956" width="420" height="74" rx="16" fill="url(#card)" stroke="#0ea5e9" stroke-width="2"/>
     <text x="146" y="1001" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700" fill="#0f172a">8. Validate rules + confidence</text>
@@ -61,13 +61,13 @@
     <text x="735" y="907" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#0f172a">Broken JSON?</text>
 
     <rect x="960" y="876" width="360" height="72" rx="16" fill="url(#card)" stroke="#f59e0b" stroke-width="2"/>
-    <text x="988" y="920" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700" fill="#0f172a">9. Phase B: repair JSON</text>
+    <text x="988" y="920" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700" fill="#0f172a">9. Phase B: repair JSON (AI/LLM)</text>
 
     <polygon points="780,1012 900,1082 780,1152 660,1082" fill="#ffffff" stroke="#334155" stroke-width="2"/>
     <text x="726" y="1077" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#0f172a">Need correction?</text>
 
     <rect x="960" y="1046" width="360" height="72" rx="16" fill="url(#card)" stroke="#f97316" stroke-width="2"/>
-    <text x="988" y="1090" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700" fill="#0f172a">10. Phase C: correct values</text>
+    <text x="988" y="1090" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700" fill="#0f172a">10. Phase C: correct values (AI/LLM)</text>
 
     <polygon points="780,1174 900,1244 780,1314 660,1244" fill="#ffffff" stroke="#334155" stroke-width="2" transform="translate(0,-142)"/>
     <text x="736" y="1107" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#0f172a">Still risky?</text>
