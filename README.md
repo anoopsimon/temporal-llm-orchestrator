@@ -149,6 +149,15 @@ Trigger direction (important):
 - Workflow start is asynchronous from API response.
 - API service does not subscribe to MinIO events.
 
+End-to-end flow diagram:
+
+![End-to-end intake flow](docs/public/diagrams/intake-flow-sequence.svg)
+
+Diagram source files:
+
+- `docs/diagrams/intake-flow-sequence.drawio` (editable Draw.io XML)
+- `docs/public/diagrams/intake-flow-sequence.svg` (rendered image)
+
 How MinIO event listening is wired:
 
 - `cmd/event-handler/main.go` starts a long-running listener process.

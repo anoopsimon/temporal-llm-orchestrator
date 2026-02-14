@@ -15,20 +15,11 @@ Current scope: intake expects UTF-8 text content. Native OCR for scanned/image/P
 
 ## How It Works (Big Picture)
 
-```text
-Upload document via API
-  -> API writes object to MinIO bucket
-  -> MinIO emits ObjectCreated event
-  -> event-handler starts Temporal workflow
-  -> workflow runs in worker
-  -> Store + classify
-  -> Phase A (extract)
-  -> if broken JSON: Phase B (repair)
-  -> validate rules + confidence
-  -> if needed: Phase C (correct values)
-  -> if still risky: human review loop
-  -> final result persisted
-```
+![End-to-end intake flow diagram](/diagrams/intake-flow-sequence.svg)
+
+Flow source files:
+- `docs/diagrams/intake-flow-sequence.drawio` (editable Draw.io XML)
+- `docs/public/diagrams/intake-flow-sequence.svg` (rendered in docs)
 
 Architecture diagram:
 
